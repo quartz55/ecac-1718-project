@@ -5,32 +5,35 @@
     <macros/>
   </context>
   <operator activated="true" class="process" compatibility="7.6.001" expanded="true" name="Process">
-    <parameter key="logverbosity" value="init"/>
+    <parameter key="logverbosity" value="all"/>
     <parameter key="random_seed" value="2001"/>
     <parameter key="send_mail" value="never"/>
     <parameter key="notification_email" value=""/>
     <parameter key="process_duration_for_mail" value="30"/>
     <parameter key="encoding" value="SYSTEM"/>
     <process expanded="true">
-      <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="Prepare Data" width="90" x="45" y="34">
+      <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve card_train" width="90" x="45" y="238">
+        <parameter key="repository_entry" value="//ECAC Project/data/raw/card_train"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve loan_train" width="90" x="45" y="136">
+        <parameter key="repository_entry" value="//ECAC Project/data/raw/loan_train"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve trans_train (2)" width="90" x="45" y="34">
+        <parameter key="repository_entry" value="//ECAC Project/data/raw/trans_train"/>
+      </operator>
+      <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="124" name="Prepare Data" width="90" x="246" y="85">
         <process expanded="true">
-          <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve loan_train" width="90" x="45" y="136">
-            <parameter key="repository_entry" value="//ECAC Project/data/raw/loan_train"/>
-          </operator>
-          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="disp_cards_preprocess" width="90" x="45" y="340">
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="cards join disp" width="90" x="45" y="289">
             <process expanded="true">
-              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve card_train" width="90" x="45" y="85">
-                <parameter key="repository_entry" value="//ECAC Project/data/raw/card_train"/>
-              </operator>
               <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve disp" width="90" x="246" y="340">
                 <parameter key="repository_entry" value="//ECAC Project/data/raw/disp"/>
               </operator>
-              <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename" width="90" x="179" y="34">
+              <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename" width="90" x="112" y="34">
                 <parameter key="old_name" value="type"/>
                 <parameter key="new_name" value="card_type"/>
                 <list key="rename_additional_attributes"/>
               </operator>
-              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (2)" width="90" x="179" y="187">
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (2)" width="90" x="112" y="187">
                 <parameter key="attribute_filter_type" value="subset"/>
                 <parameter key="attribute" value=""/>
                 <parameter key="attributes" value="disp_id|issued|type|card_type"/>
@@ -44,7 +47,7 @@
                 <parameter key="invert_selection" value="false"/>
                 <parameter key="include_special_attributes" value="false"/>
               </operator>
-              <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical" width="90" x="313" y="85">
+              <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical" width="90" x="246" y="85">
                 <parameter key="attribute_name" value="issued"/>
                 <parameter key="time_unit" value="month"/>
                 <parameter key="millisecond_relative_to" value="second"/>
@@ -59,8 +62,8 @@
                 <parameter key="year_relative_to" value="era"/>
                 <parameter key="keep_old_attribute" value="false"/>
               </operator>
-              <operator activated="true" class="python_scripting:execute_python" compatibility="7.4.000" expanded="true" height="82" name="Execute Python" width="90" x="447" y="85">
-                <parameter key="script" value="import pandas&#10;&#10;# rm_main is a mandatory function, &#10;# the number of arguments has to be the number of input ports (can be none)&#10;def rm_main(data):&#10;&#10;    maxValue = max(data['issued'])+1&#10;    &#10;    values = data['issued'].apply(lambda x: maxValue-x)&#10;    data['issued'] = pandas.Series(values, dtype='int32')&#10;    print(data['issued'])&#10;    # connect 2 output ports to see the results&#10;    return data"/>
+              <operator activated="true" class="python_scripting:execute_python" compatibility="7.4.000" expanded="true" height="82" name="Execute Python" width="90" x="380" y="85">
+                <parameter key="script" value="import pandas&#10;&#10;# rm_main is a mandatory function, &#10;# the number of arguments has to be the number of input ports (can be none)&#10;def rm_main(data):&#10;&#10;    maxValue = max(data['issued'])+1&#10;    &#10;    values = data['issued'].apply(lambda x: maxValue-x)&#10;    data['issued'] = pandas.Series(values, dtype='int32')&#10;    #print(data['issued'])&#10;    # connect 2 output ports to see the results&#10;    return data"/>
               </operator>
               <operator activated="true" class="filter_examples" compatibility="7.6.001" expanded="true" height="103" name="OWNERS only" width="90" x="447" y="340">
                 <parameter key="parameter_expression" value=""/>
@@ -98,8 +101,28 @@
                 <parameter key="include_special_attributes" value="false"/>
                 <parameter key="default" value="zero"/>
                 <list key="columns"/>
+                <parameter key="replenishment_value" value="as"/>
               </operator>
-              <connect from_op="Retrieve card_train" from_port="output" to_op="Rename" to_port="example set input"/>
+              <operator activated="true" class="replace_missing_values" compatibility="7.6.001" expanded="true" height="103" name="Replace Missing Values (2)" width="90" x="916" y="136">
+                <parameter key="return_preprocessing_model" value="false"/>
+                <parameter key="create_view" value="false"/>
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="card_type"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="default" value="value"/>
+                <list key="columns"/>
+                <parameter key="replenishment_value" value="none"/>
+              </operator>
+              <connect from_port="in 1" to_op="Rename" to_port="example set input"/>
               <connect from_op="Retrieve disp" from_port="output" to_op="OWNERS only" to_port="example set input"/>
               <connect from_op="Rename" from_port="example set output" to_op="Select Attributes (2)" to_port="example set input"/>
               <connect from_op="Select Attributes (2)" from_port="example set output" to_op="Date to Numerical" to_port="example set input"/>
@@ -107,64 +130,345 @@
               <connect from_op="Execute Python" from_port="output 1" to_op="Join" to_port="left"/>
               <connect from_op="OWNERS only" from_port="example set output" to_op="Join" to_port="right"/>
               <connect from_op="Join" from_port="join" to_op="Replace Missing Values" to_port="example set input"/>
-              <connect from_op="Replace Missing Values" from_port="example set output" to_port="out 1"/>
+              <connect from_op="Replace Missing Values" from_port="example set output" to_op="Replace Missing Values (2)" to_port="example set input"/>
+              <connect from_op="Replace Missing Values (2)" from_port="example set output" to_port="out 1"/>
               <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
               <portSpacing port="sink_out 1" spacing="0"/>
               <portSpacing port="sink_out 2" spacing="0"/>
             </process>
           </operator>
-          <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve account" width="90" x="179" y="238">
-            <parameter key="repository_entry" value="../data/raw/account"/>
-          </operator>
-          <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="accounts_disp" width="90" x="313" y="340">
-            <parameter key="remove_double_attributes" value="true"/>
-            <parameter key="join_type" value="inner"/>
-            <parameter key="use_id_attribute_as_key" value="false"/>
-            <list key="key_attributes">
-              <parameter key="account_id" value="account_id"/>
-            </list>
-            <parameter key="keep_both_join_attributes" value="false"/>
-          </operator>
-          <operator activated="false" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (4)" width="90" x="313" y="34">
-            <parameter key="remove_double_attributes" value="true"/>
-            <parameter key="join_type" value="inner"/>
-            <parameter key="use_id_attribute_as_key" value="false"/>
-            <list key="key_attributes">
-              <parameter key="account_id" value="account_id"/>
-            </list>
-            <parameter key="keep_both_join_attributes" value="false"/>
-          </operator>
-          <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve client" width="90" x="447" y="391">
-            <parameter key="repository_entry" value="//ECAC Project/data/raw/client"/>
-          </operator>
-          <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (3)" width="90" x="648" y="340">
-            <parameter key="attribute_filter_type" value="subset"/>
-            <parameter key="attribute" value=""/>
-            <parameter key="attributes" value="dob"/>
-            <parameter key="use_except_expression" value="false"/>
-            <parameter key="value_type" value="attribute_value"/>
-            <parameter key="use_value_type_exception" value="false"/>
-            <parameter key="except_value_type" value="time"/>
-            <parameter key="block_type" value="attribute_block"/>
-            <parameter key="use_block_type_exception" value="false"/>
-            <parameter key="except_block_type" value="value_matrix_row_start"/>
-            <parameter key="invert_selection" value="true"/>
-            <parameter key="include_special_attributes" value="false"/>
-          </operator>
-          <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="clients_disp" width="90" x="581" y="187">
-            <parameter key="remove_double_attributes" value="true"/>
-            <parameter key="join_type" value="inner"/>
-            <parameter key="use_id_attribute_as_key" value="false"/>
-            <list key="key_attributes">
-              <parameter key="client_id" value="client_id"/>
-            </list>
-            <parameter key="keep_both_join_attributes" value="false"/>
-          </operator>
-          <operator activated="false" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="add_balance_to_loan" width="90" x="246" y="136">
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="cards join accounts" width="90" x="179" y="289">
             <process expanded="true">
-              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve trans_train" width="90" x="179" y="187">
-                <parameter key="repository_entry" value="//ECAC Project/data/raw/trans_train"/>
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve account" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/raw/account"/>
               </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="accounts_disp" width="90" x="45" y="136">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="accounts_disp" to_port="right"/>
+              <connect from_op="Retrieve account" from_port="output" to_op="accounts_disp" to_port="left"/>
+              <connect from_op="accounts_disp" from_port="join" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="cards join client" width="90" x="313" y="289">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve client" width="90" x="45" y="187">
+                <parameter key="repository_entry" value="//ECAC Project/data/raw/client"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (3)" width="90" x="179" y="187">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="dob"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="true"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="clients_disp" width="90" x="246" y="34">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="client_id" value="client_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="clients_disp" to_port="left"/>
+              <connect from_op="Retrieve client" from_port="output" to_op="Select Attributes (3)" to_port="example set input"/>
+              <connect from_op="Select Attributes (3)" from_port="example set output" to_op="clients_disp" to_port="right"/>
+              <connect from_op="clients_disp" from_port="join" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="client join district" width="90" x="447" y="289">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve district" width="90" x="45" y="187">
+                <parameter key="repository_entry" value="//ECAC Project/data/raw/district"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (8)" width="90" x="45" y="85">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="district_id" value="code "/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="replace" compatibility="7.6.001" expanded="true" height="82" name="Replace (2)" width="90" x="313" y="85">
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="region"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="nominal"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="file_path"/>
+                <parameter key="block_type" value="single_value"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="single_value"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="replace_what" value="Prague"/>
+                <parameter key="replace_by" value="central Bohemia"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (7)" width="90" x="581" y="85">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="no. of cities |no. of commited crimes '95 |no. of commited crimes '96 |no. of enterpreneurs per 1000 inhabitants |no. of inhabitants|no. of municipalities with inhabitants 2000-9999 |no. of municipalities with inhabitants 500-1999|no. of municipalities with inhabitants &lt; 499 |no. of municipalities with inhabitants &gt;10000 |ratio of urban inhabitants |unemploymant rate '95 |name "/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="true"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="Join (8)" to_port="left"/>
+              <connect from_op="Retrieve district" from_port="output" to_op="Join (8)" to_port="right"/>
+              <connect from_op="Join (8)" from_port="join" to_op="Replace (2)" to_port="example set input"/>
+              <connect from_op="Replace (2)" from_port="example set output" to_op="Select Attributes (7)" to_port="example set input"/>
+              <connect from_op="Select Attributes (7)" from_port="example set output" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="set_role" compatibility="7.6.001" expanded="true" height="82" name="Set Role (2)" width="90" x="45" y="34">
+            <parameter key="attribute_name" value="trans_id"/>
+            <parameter key="target_role" value="regular"/>
+            <list key="set_additional_roles"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="7.6.001" expanded="true" height="103" name="Multiply trans" width="90" x="179" y="34"/>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="process trans" width="90" x="313" y="34">
+            <process expanded="true">
+              <operator activated="true" class="replace" compatibility="7.6.001" expanded="true" height="82" name="Replace" width="90" x="45" y="34">
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="type"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="nominal"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="file_path"/>
+                <parameter key="block_type" value="single_value"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="single_value"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="replace_what" value="withdrawal in cash"/>
+                <parameter key="replace_by" value="withdrawal"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (5)" width="90" x="45" y="238">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="account_id|amount|balance|date|type|trans_id"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="multiply" compatibility="7.6.001" expanded="true" height="103" name="Multiply (3)" width="90" x="179" y="238"/>
+              <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="Monthly Stats" width="90" x="313" y="85">
+                <process expanded="true">
+                  <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical (4)" width="90" x="45" y="34">
+                    <parameter key="attribute_name" value="date"/>
+                    <parameter key="time_unit" value="month"/>
+                    <parameter key="millisecond_relative_to" value="second"/>
+                    <parameter key="second_relative_to" value="minute"/>
+                    <parameter key="minute_relative_to" value="hour"/>
+                    <parameter key="hour_relative_to" value="day"/>
+                    <parameter key="day_relative_to" value="month"/>
+                    <parameter key="week_relative_to" value="year"/>
+                    <parameter key="month_relative_to" value="epoch"/>
+                    <parameter key="quarter_relative_to" value="year"/>
+                    <parameter key="half_year_relative_to" value="year"/>
+                    <parameter key="year_relative_to" value="era"/>
+                    <parameter key="keep_old_attribute" value="true"/>
+                  </operator>
+                  <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate (3)" width="90" x="179" y="34">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="all"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="balance" value="average"/>
+                      <parameter key="balance" value="standard_deviation"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id|date_month"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate (4)" width="90" x="313" y="34">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="all"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="average(balance)" value="average"/>
+                      <parameter key="standard_deviation(balance)" value="average"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (5)" width="90" x="447" y="34">
+                    <parameter key="old_name" value="average(average(balance))"/>
+                    <parameter key="new_name" value="avg_monthly_balance"/>
+                    <list key="rename_additional_attributes">
+                      <parameter key="average(standard_deviation(balance))" value="monthly_balance_std_dev"/>
+                    </list>
+                  </operator>
+                  <connect from_port="in 1" to_op="Date to Numerical (4)" to_port="example set input"/>
+                  <connect from_op="Date to Numerical (4)" from_port="example set output" to_op="Aggregate (3)" to_port="example set input"/>
+                  <connect from_op="Aggregate (3)" from_port="example set output" to_op="Aggregate (4)" to_port="example set input"/>
+                  <connect from_op="Aggregate (4)" from_port="example set output" to_op="Rename (5)" to_port="example set input"/>
+                  <connect from_op="Rename (5)" from_port="example set output" to_port="out 1"/>
+                  <portSpacing port="source_in 1" spacing="0"/>
+                  <portSpacing port="source_in 2" spacing="0"/>
+                  <portSpacing port="sink_out 1" spacing="0"/>
+                  <portSpacing port="sink_out 2" spacing="0"/>
+                </process>
+              </operator>
+              <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="All Time Stats" width="90" x="313" y="391">
+                <process expanded="true">
+                  <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate" width="90" x="45" y="34">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="single"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="trans_id" value="count"/>
+                      <parameter key="date" value="maximum"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.001" expanded="true" height="82" name="Generate Attributes" width="90" x="179" y="34">
+                    <list key="function_descriptions">
+                      <parameter key="last_trans" value="floor(date_diff([maximum(date)], date_parse(&quot;01/01/1997&quot;)) / (1000 * 60 * 60 * 24))"/>
+                    </list>
+                    <parameter key="keep_all" value="true"/>
+                  </operator>
+                  <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (6)" width="90" x="313" y="34">
+                    <parameter key="attribute_filter_type" value="subset"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value="maximum(date)"/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="true"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                  </operator>
+                  <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (6)" width="90" x="447" y="34">
+                    <parameter key="old_name" value="count(trans_id)"/>
+                    <parameter key="new_name" value="num_trans"/>
+                    <list key="rename_additional_attributes"/>
+                  </operator>
+                  <connect from_port="in 1" to_op="Aggregate" to_port="example set input"/>
+                  <connect from_op="Aggregate" from_port="example set output" to_op="Generate Attributes" to_port="example set input"/>
+                  <connect from_op="Generate Attributes" from_port="example set output" to_op="Select Attributes (6)" to_port="example set input"/>
+                  <connect from_op="Select Attributes (6)" from_port="example set output" to_op="Rename (6)" to_port="example set input"/>
+                  <connect from_op="Rename (6)" from_port="example set output" to_port="out 1"/>
+                  <portSpacing port="source_in 1" spacing="0"/>
+                  <portSpacing port="source_in 2" spacing="0"/>
+                  <portSpacing port="sink_out 1" spacing="0"/>
+                  <portSpacing port="sink_out 2" spacing="0"/>
+                </process>
+                <description align="center" color="yellow" colored="true" width="126">Days since last transaction&lt;br&gt;Number of transactions</description>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (7)" width="90" x="514" y="238">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="Replace" to_port="example set input"/>
+              <connect from_op="Replace" from_port="example set output" to_op="Select Attributes (5)" to_port="example set input"/>
+              <connect from_op="Select Attributes (5)" from_port="example set output" to_op="Multiply (3)" to_port="input"/>
+              <connect from_op="Multiply (3)" from_port="output 1" to_op="Monthly Stats" to_port="in 1"/>
+              <connect from_op="Multiply (3)" from_port="output 2" to_op="All Time Stats" to_port="in 1"/>
+              <connect from_op="Monthly Stats" from_port="out 1" to_op="Join (7)" to_port="left"/>
+              <connect from_op="All Time Stats" from_port="out 1" to_op="Join (7)" to_port="right"/>
+              <connect from_op="Join (7)" from_port="join" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="set_role" compatibility="7.6.001" expanded="true" height="82" name="Set Role (4)" width="90" x="112" y="136">
+            <parameter key="attribute_name" value="loan_id"/>
+            <parameter key="target_role" value="id"/>
+            <list key="set_additional_roles"/>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="103" name="add_balance_to_loan" width="90" x="313" y="136">
+            <process expanded="true">
               <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (2)" width="90" x="313" y="187">
                 <parameter key="old_name" value="date"/>
                 <parameter key="new_name" value="trans_date"/>
@@ -242,7 +546,7 @@
                 <parameter key="only_distinct" value="false"/>
                 <parameter key="ignore_missings" value="true"/>
               </operator>
-              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (2)" width="90" x="648" y="238">
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (2)" width="90" x="514" y="289">
                 <parameter key="remove_double_attributes" value="true"/>
                 <parameter key="join_type" value="inner"/>
                 <parameter key="use_id_attribute_as_key" value="false"/>
@@ -252,7 +556,7 @@
                 </list>
                 <parameter key="keep_both_join_attributes" value="false"/>
               </operator>
-              <operator activated="true" class="remove_duplicates" compatibility="7.6.001" expanded="true" height="103" name="Remove Duplicates" width="90" x="782" y="238">
+              <operator activated="true" class="remove_duplicates" compatibility="7.6.001" expanded="true" height="103" name="Remove Duplicates" width="90" x="715" y="289">
                 <parameter key="attribute_filter_type" value="single"/>
                 <parameter key="attribute" value="account_id"/>
                 <parameter key="attributes" value=""/>
@@ -267,7 +571,7 @@
                 <parameter key="include_special_attributes" value="false"/>
                 <parameter key="treat_missing_values_as_duplicates" value="false"/>
               </operator>
-              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (4)" width="90" x="916" y="238">
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (4)" width="90" x="849" y="289">
                 <parameter key="attribute_filter_type" value="subset"/>
                 <parameter key="attribute" value=""/>
                 <parameter key="attributes" value="loan_id|balance"/>
@@ -281,7 +585,7 @@
                 <parameter key="invert_selection" value="false"/>
                 <parameter key="include_special_attributes" value="false"/>
               </operator>
-              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (6)" width="90" x="1184" y="391">
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (6)" width="90" x="916" y="391">
                 <parameter key="remove_double_attributes" value="true"/>
                 <parameter key="join_type" value="inner"/>
                 <parameter key="use_id_attribute_as_key" value="false"/>
@@ -290,13 +594,27 @@
                 </list>
                 <parameter key="keep_both_join_attributes" value="false"/>
               </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (8)" width="90" x="1117" y="340">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="trans_id"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="true"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
               <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (4)" width="90" x="1258" y="187">
                 <parameter key="old_name" value="balance"/>
                 <parameter key="new_name" value="loan_balance"/>
                 <list key="rename_additional_attributes"/>
               </operator>
-              <connect from_port="in 1" to_op="Multiply (2)" to_port="input"/>
-              <connect from_op="Retrieve trans_train" from_port="output" to_op="Rename (2)" to_port="example set input"/>
+              <connect from_port="in 1" to_op="Rename (2)" to_port="example set input"/>
+              <connect from_port="in 2" to_op="Multiply (2)" to_port="input"/>
               <connect from_op="Rename (2)" from_port="example set output" to_op="Date to Numerical (2)" to_port="example set input"/>
               <connect from_op="Date to Numerical (2)" from_port="example set output" to_op="Join (5)" to_port="right"/>
               <connect from_op="Multiply (2)" from_port="output 1" to_op="Rename (3)" to_port="example set input"/>
@@ -311,13 +629,24 @@
               <connect from_op="Join (2)" from_port="join" to_op="Remove Duplicates" to_port="example set input"/>
               <connect from_op="Remove Duplicates" from_port="example set output" to_op="Select Attributes (4)" to_port="example set input"/>
               <connect from_op="Select Attributes (4)" from_port="example set output" to_op="Join (6)" to_port="left"/>
-              <connect from_op="Join (6)" from_port="join" to_op="Rename (4)" to_port="example set input"/>
+              <connect from_op="Join (6)" from_port="join" to_op="Select Attributes (8)" to_port="example set input"/>
+              <connect from_op="Select Attributes (8)" from_port="example set output" to_op="Rename (4)" to_port="example set input"/>
               <connect from_op="Rename (4)" from_port="example set output" to_port="out 1"/>
               <portSpacing port="source_in 1" spacing="0"/>
               <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="source_in 3" spacing="0"/>
               <portSpacing port="sink_out 1" spacing="0"/>
               <portSpacing port="sink_out 2" spacing="0"/>
             </process>
+          </operator>
+          <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (4)" width="90" x="447" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="account_id" value="account_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
           </operator>
           <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (3)" width="90" x="648" y="85">
             <parameter key="remove_double_attributes" value="true"/>
@@ -331,7 +660,7 @@
           <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes" width="90" x="983" y="34">
             <parameter key="attribute_filter_type" value="subset"/>
             <parameter key="attribute" value=""/>
-            <parameter key="attributes" value="client_id|date|disp_id|district_id|loan_id"/>
+            <parameter key="attributes" value="loan_id|age|avg_monthly_balance|card_type|issued|last_trans|loan_balance|monthly_balance_std_dev|num_trans|payments|sex|status|type|unemploymant rate '96 |amount"/>
             <parameter key="use_except_expression" value="false"/>
             <parameter key="value_type" value="attribute_value"/>
             <parameter key="use_value_type_exception" value="false"/>
@@ -339,32 +668,39 @@
             <parameter key="block_type" value="attribute_block"/>
             <parameter key="use_block_type_exception" value="false"/>
             <parameter key="except_block_type" value="value_matrix_row_start"/>
-            <parameter key="invert_selection" value="true"/>
+            <parameter key="invert_selection" value="false"/>
             <parameter key="include_special_attributes" value="false"/>
           </operator>
-          <connect from_op="Retrieve loan_train" from_port="output" to_op="Join (3)" to_port="left"/>
-          <connect from_op="disp_cards_preprocess" from_port="out 1" to_op="accounts_disp" to_port="right"/>
-          <connect from_op="Retrieve account" from_port="output" to_op="accounts_disp" to_port="left"/>
-          <connect from_op="accounts_disp" from_port="join" to_op="clients_disp" to_port="left"/>
-          <connect from_op="Retrieve client" from_port="output" to_op="Select Attributes (3)" to_port="example set input"/>
-          <connect from_op="Select Attributes (3)" from_port="example set output" to_op="clients_disp" to_port="right"/>
-          <connect from_op="clients_disp" from_port="join" to_op="Join (3)" to_port="right"/>
+          <connect from_port="in 1" to_op="Set Role (2)" to_port="example set input"/>
+          <connect from_port="in 2" to_op="Set Role (4)" to_port="example set input"/>
+          <connect from_port="in 3" to_op="cards join disp" to_port="in 1"/>
+          <connect from_op="cards join disp" from_port="out 1" to_op="cards join accounts" to_port="in 1"/>
+          <connect from_op="cards join accounts" from_port="out 1" to_op="cards join client" to_port="in 1"/>
+          <connect from_op="cards join client" from_port="out 1" to_op="client join district" to_port="in 1"/>
+          <connect from_op="client join district" from_port="out 1" to_op="Join (3)" to_port="right"/>
+          <connect from_op="Set Role (2)" from_port="example set output" to_op="Multiply trans" to_port="input"/>
+          <connect from_op="Multiply trans" from_port="output 1" to_op="process trans" to_port="in 1"/>
+          <connect from_op="Multiply trans" from_port="output 2" to_op="add_balance_to_loan" to_port="in 1"/>
+          <connect from_op="process trans" from_port="out 1" to_op="Join (4)" to_port="left"/>
+          <connect from_op="Set Role (4)" from_port="example set output" to_op="add_balance_to_loan" to_port="in 2"/>
+          <connect from_op="add_balance_to_loan" from_port="out 1" to_op="Join (4)" to_port="right"/>
+          <connect from_op="Join (4)" from_port="join" to_op="Join (3)" to_port="left"/>
           <connect from_op="Join (3)" from_port="join" to_op="Select Attributes" to_port="example set input"/>
           <connect from_op="Select Attributes" from_port="example set output" to_port="out 1"/>
           <portSpacing port="source_in 1" spacing="0"/>
           <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="source_in 3" spacing="0"/>
+          <portSpacing port="source_in 4" spacing="0"/>
           <portSpacing port="sink_out 1" spacing="0"/>
           <portSpacing port="sink_out 2" spacing="0"/>
         </process>
       </operator>
-      <operator activated="true" class="set_role" compatibility="7.6.001" expanded="true" height="82" name="Set Role" width="90" x="313" y="34">
+      <operator activated="true" class="set_role" compatibility="7.6.001" expanded="true" height="82" name="Set Role" width="90" x="380" y="34">
         <parameter key="attribute_name" value="status"/>
         <parameter key="target_role" value="label"/>
-        <list key="set_additional_roles">
-          <parameter key="account_id" value="id"/>
-        </list>
+        <list key="set_additional_roles"/>
       </operator>
-      <operator activated="true" class="concurrency:cross_validation" compatibility="7.6.001" expanded="true" height="145" name="Cross Validation (2)" width="90" x="514" y="289">
+      <operator activated="true" class="concurrency:cross_validation" compatibility="7.6.001" expanded="true" height="145" name="Cross Validation" width="90" x="916" y="85">
         <parameter key="split_on_batch_attribute" value="false"/>
         <parameter key="leave_one_out" value="false"/>
         <parameter key="number_of_folds" value="10"/>
@@ -373,7 +709,7 @@
         <parameter key="local_random_seed" value="1992"/>
         <parameter key="enable_parallel_execution" value="true"/>
         <process expanded="true">
-          <operator activated="true" class="normalize" compatibility="7.6.001" expanded="true" height="103" name="Normalize (2)" width="90" x="45" y="85">
+          <operator activated="false" class="normalize" compatibility="7.6.001" expanded="true" height="103" name="Normalize (2)" width="90" x="112" y="85">
             <parameter key="return_preprocessing_model" value="false"/>
             <parameter key="create_view" value="false"/>
             <parameter key="attribute_filter_type" value="all"/>
@@ -393,55 +729,51 @@
             <parameter key="max" value="1.0"/>
             <parameter key="allow_negative_values" value="false"/>
           </operator>
-          <operator activated="true" class="concurrency:parallel_decision_tree" compatibility="7.6.001" expanded="true" height="82" name="Decision Tree (2)" width="90" x="246" y="34">
+          <operator activated="false" class="concurrency:parallel_decision_tree" compatibility="7.6.001" expanded="true" height="82" name="Decision Tree (2)" width="90" x="313" y="187">
             <parameter key="criterion" value="gain_ratio"/>
             <parameter key="maximal_depth" value="20"/>
             <parameter key="apply_pruning" value="true"/>
             <parameter key="confidence" value="0.25"/>
             <parameter key="apply_prepruning" value="true"/>
-            <parameter key="minimal_gain" value="0.05"/>
+            <parameter key="minimal_gain" value="0.1"/>
             <parameter key="minimal_leaf_size" value="2"/>
             <parameter key="minimal_size_for_split" value="4"/>
             <parameter key="number_of_prepruning_alternatives" value="3"/>
           </operator>
-          <connect from_port="training set" to_op="Normalize (2)" to_port="example set input"/>
+          <operator activated="true" class="weka:W-RandomForest" compatibility="7.3.000" expanded="true" height="82" name="W-RandomForest" width="90" x="179" y="289">
+            <parameter key="I" value="10.0"/>
+            <parameter key="K" value="0.0"/>
+            <parameter key="S" value="1.0"/>
+            <parameter key="D" value="false"/>
+          </operator>
+          <connect from_port="training set" to_op="W-RandomForest" to_port="training set"/>
           <connect from_op="Normalize (2)" from_port="example set output" to_op="Decision Tree (2)" to_port="training set"/>
-          <connect from_op="Normalize (2)" from_port="preprocessing model" to_port="through 1"/>
-          <connect from_op="Decision Tree (2)" from_port="model" to_port="model"/>
+          <connect from_op="W-RandomForest" from_port="model" to_port="model"/>
           <portSpacing port="source_training set" spacing="0"/>
           <portSpacing port="sink_model" spacing="0"/>
           <portSpacing port="sink_through 1" spacing="0"/>
-          <portSpacing port="sink_through 2" spacing="0"/>
         </process>
         <process expanded="true">
-          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model (3)" width="90" x="112" y="187">
+          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model" width="90" x="112" y="34">
             <list key="application_parameters"/>
             <parameter key="create_view" value="false"/>
           </operator>
-          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model (4)" width="90" x="112" y="34">
-            <list key="application_parameters"/>
-            <parameter key="create_view" value="false"/>
-          </operator>
-          <operator activated="true" class="performance" compatibility="7.6.001" expanded="true" height="82" name="Performance (2)" width="90" x="313" y="34">
+          <operator activated="true" class="performance" compatibility="7.6.001" expanded="true" height="82" name="Performance" width="90" x="313" y="187">
             <parameter key="use_example_weights" value="true"/>
           </operator>
-          <connect from_port="model" to_op="Apply Model (4)" to_port="model"/>
-          <connect from_port="test set" to_op="Apply Model (3)" to_port="unlabelled data"/>
-          <connect from_port="through 1" to_op="Apply Model (3)" to_port="model"/>
-          <connect from_op="Apply Model (3)" from_port="labelled data" to_op="Apply Model (4)" to_port="unlabelled data"/>
-          <connect from_op="Apply Model (4)" from_port="labelled data" to_op="Performance (2)" to_port="labelled data"/>
-          <connect from_op="Performance (2)" from_port="performance" to_port="performance 1"/>
-          <connect from_op="Performance (2)" from_port="example set" to_port="test set results"/>
+          <connect from_port="model" to_op="Apply Model" to_port="model"/>
+          <connect from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
+          <connect from_op="Apply Model" from_port="labelled data" to_op="Performance" to_port="labelled data"/>
+          <connect from_op="Performance" from_port="performance" to_port="performance 1"/>
           <portSpacing port="source_model" spacing="0"/>
           <portSpacing port="source_test set" spacing="0"/>
           <portSpacing port="source_through 1" spacing="0"/>
-          <portSpacing port="source_through 2" spacing="0"/>
           <portSpacing port="sink_test set results" spacing="0"/>
           <portSpacing port="sink_performance 1" spacing="0"/>
           <portSpacing port="sink_performance 2" spacing="0"/>
         </process>
       </operator>
-      <operator activated="false" class="concurrency:cross_validation" compatibility="7.6.001" expanded="true" height="145" name="Cross Validation" width="90" x="581" y="34">
+      <operator activated="false" class="concurrency:cross_validation" compatibility="7.6.001" expanded="true" height="145" name="Cross Validation (2)" width="90" x="715" y="34">
         <parameter key="split_on_batch_attribute" value="false"/>
         <parameter key="leave_one_out" value="false"/>
         <parameter key="number_of_folds" value="10"/>
@@ -483,42 +815,800 @@
           </operator>
           <connect from_port="training set" to_op="Normalize" to_port="example set input"/>
           <connect from_op="Normalize" from_port="example set output" to_op="Decision Tree" to_port="training set"/>
+          <connect from_op="Normalize" from_port="preprocessing model" to_port="through 1"/>
           <connect from_op="Decision Tree" from_port="model" to_port="model"/>
           <portSpacing port="source_training set" spacing="0"/>
           <portSpacing port="sink_model" spacing="0"/>
           <portSpacing port="sink_through 1" spacing="0"/>
+          <portSpacing port="sink_through 2" spacing="0"/>
         </process>
         <process expanded="true">
-          <operator activated="false" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model (2)" width="90" x="112" y="187">
+          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model (3)" width="90" x="112" y="187">
             <list key="application_parameters"/>
             <parameter key="create_view" value="false"/>
           </operator>
-          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model" width="90" x="112" y="34">
+          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model (4)" width="90" x="112" y="34">
             <list key="application_parameters"/>
             <parameter key="create_view" value="false"/>
           </operator>
-          <operator activated="true" class="performance" compatibility="7.6.001" expanded="true" height="82" name="Performance" width="90" x="313" y="34">
+          <operator activated="true" class="performance" compatibility="7.6.001" expanded="true" height="82" name="Performance (2)" width="90" x="313" y="34">
             <parameter key="use_example_weights" value="true"/>
           </operator>
-          <connect from_port="model" to_op="Apply Model" to_port="model"/>
-          <connect from_port="test set" to_op="Apply Model" to_port="unlabelled data"/>
-          <connect from_op="Apply Model" from_port="labelled data" to_op="Performance" to_port="labelled data"/>
-          <connect from_op="Performance" from_port="performance" to_port="performance 1"/>
-          <connect from_op="Performance" from_port="example set" to_port="test set results"/>
+          <connect from_port="model" to_op="Apply Model (4)" to_port="model"/>
+          <connect from_port="test set" to_op="Apply Model (3)" to_port="unlabelled data"/>
+          <connect from_port="through 1" to_op="Apply Model (3)" to_port="model"/>
+          <connect from_op="Apply Model (3)" from_port="labelled data" to_op="Apply Model (4)" to_port="unlabelled data"/>
+          <connect from_op="Apply Model (4)" from_port="labelled data" to_op="Performance (2)" to_port="labelled data"/>
+          <connect from_op="Performance (2)" from_port="performance" to_port="performance 1"/>
+          <connect from_op="Performance (2)" from_port="example set" to_port="test set results"/>
           <portSpacing port="source_model" spacing="0"/>
           <portSpacing port="source_test set" spacing="0"/>
           <portSpacing port="source_through 1" spacing="0"/>
+          <portSpacing port="source_through 2" spacing="0"/>
           <portSpacing port="sink_test set results" spacing="0"/>
           <portSpacing port="sink_performance 1" spacing="0"/>
           <portSpacing port="sink_performance 2" spacing="0"/>
         </process>
       </operator>
-      <connect from_port="input 1" to_op="Prepare Data" to_port="in 1"/>
+      <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve trans_test" width="90" x="45" y="391">
+        <parameter key="repository_entry" value="../data/raw/trans_test"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve loan_test" width="90" x="45" y="493">
+        <parameter key="repository_entry" value="//ECAC Project/data/raw/loan_test"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve card_test" width="90" x="45" y="595">
+        <parameter key="repository_entry" value="//ECAC Project/data/raw/card_test"/>
+      </operator>
+      <operator activated="false" class="subprocess" compatibility="7.6.001" expanded="true" height="124" name="Prepare Data (3)" width="90" x="313" y="340">
+        <process expanded="true">
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="cards join disp (3)" width="90" x="45" y="289">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve disp (3)" width="90" x="246" y="340">
+                <parameter key="repository_entry" value="//ECAC Project/data/raw/disp"/>
+              </operator>
+              <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (14)" width="90" x="112" y="34">
+                <parameter key="old_name" value="type"/>
+                <parameter key="new_name" value="card_type"/>
+                <list key="rename_additional_attributes"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (18)" width="90" x="112" y="187">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="disp_id|issued|type|card_type"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical (9)" width="90" x="246" y="85">
+                <parameter key="attribute_name" value="issued"/>
+                <parameter key="time_unit" value="month"/>
+                <parameter key="millisecond_relative_to" value="second"/>
+                <parameter key="second_relative_to" value="minute"/>
+                <parameter key="minute_relative_to" value="hour"/>
+                <parameter key="hour_relative_to" value="day"/>
+                <parameter key="day_relative_to" value="month"/>
+                <parameter key="week_relative_to" value="year"/>
+                <parameter key="month_relative_to" value="epoch"/>
+                <parameter key="quarter_relative_to" value="year"/>
+                <parameter key="half_year_relative_to" value="year"/>
+                <parameter key="year_relative_to" value="era"/>
+                <parameter key="keep_old_attribute" value="false"/>
+              </operator>
+              <operator activated="true" class="python_scripting:execute_python" compatibility="7.4.000" expanded="true" height="82" name="Execute Python (5)" width="90" x="380" y="85">
+                <parameter key="script" value="import pandas&#10;&#10;# rm_main is a mandatory function, &#10;# the number of arguments has to be the number of input ports (can be none)&#10;def rm_main(data):&#10;&#10;    maxValue = max(data['issued'])+1&#10;    &#10;    values = data['issued'].apply(lambda x: maxValue-x)&#10;    data['issued'] = pandas.Series(values, dtype='int32')&#10;    #print(data['issued'])&#10;    # connect 2 output ports to see the results&#10;    return data"/>
+              </operator>
+              <operator activated="true" class="filter_examples" compatibility="7.6.001" expanded="true" height="103" name="OWNERS only (3)" width="90" x="447" y="340">
+                <parameter key="parameter_expression" value=""/>
+                <parameter key="condition_class" value="custom_filters"/>
+                <parameter key="invert_filter" value="false"/>
+                <list key="filters_list">
+                  <parameter key="filters_entry_key" value="type.equals.OWNER"/>
+                </list>
+                <parameter key="filters_logic_and" value="true"/>
+                <parameter key="filters_check_metadata" value="true"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (17)" width="90" x="581" y="136">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="right"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="disp_id" value="disp_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="replace_missing_values" compatibility="7.6.001" expanded="true" height="103" name="Replace Missing Values (5)" width="90" x="715" y="136">
+                <parameter key="return_preprocessing_model" value="false"/>
+                <parameter key="create_view" value="false"/>
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="issued"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="default" value="zero"/>
+                <list key="columns"/>
+                <parameter key="replenishment_value" value="as"/>
+              </operator>
+              <operator activated="true" class="replace_missing_values" compatibility="7.6.001" expanded="true" height="103" name="Replace Missing Values (6)" width="90" x="916" y="136">
+                <parameter key="return_preprocessing_model" value="false"/>
+                <parameter key="create_view" value="false"/>
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="card_type"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="default" value="value"/>
+                <list key="columns"/>
+                <parameter key="replenishment_value" value="none"/>
+              </operator>
+              <connect from_port="in 1" to_op="Rename (14)" to_port="example set input"/>
+              <connect from_op="Retrieve disp (3)" from_port="output" to_op="OWNERS only (3)" to_port="example set input"/>
+              <connect from_op="Rename (14)" from_port="example set output" to_op="Select Attributes (18)" to_port="example set input"/>
+              <connect from_op="Select Attributes (18)" from_port="example set output" to_op="Date to Numerical (9)" to_port="example set input"/>
+              <connect from_op="Date to Numerical (9)" from_port="example set output" to_op="Execute Python (5)" to_port="input 1"/>
+              <connect from_op="Execute Python (5)" from_port="output 1" to_op="Join (17)" to_port="left"/>
+              <connect from_op="OWNERS only (3)" from_port="example set output" to_op="Join (17)" to_port="right"/>
+              <connect from_op="Join (17)" from_port="join" to_op="Replace Missing Values (5)" to_port="example set input"/>
+              <connect from_op="Replace Missing Values (5)" from_port="example set output" to_op="Replace Missing Values (6)" to_port="example set input"/>
+              <connect from_op="Replace Missing Values (6)" from_port="example set output" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="cards join accounts (3)" width="90" x="179" y="289">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve account (3)" width="90" x="45" y="34">
+                <parameter key="repository_entry" value="../data/raw/account"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="accounts_disp (3)" width="90" x="45" y="136">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="accounts_disp (3)" to_port="right"/>
+              <connect from_op="Retrieve account (3)" from_port="output" to_op="accounts_disp (3)" to_port="left"/>
+              <connect from_op="accounts_disp (3)" from_port="join" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="cards join client (3)" width="90" x="313" y="289">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve client (3)" width="90" x="45" y="187">
+                <parameter key="repository_entry" value="//ECAC Project/data/raw/client"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (19)" width="90" x="179" y="187">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="dob"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="true"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="clients_disp (3)" width="90" x="246" y="34">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="client_id" value="client_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="clients_disp (3)" to_port="left"/>
+              <connect from_op="Retrieve client (3)" from_port="output" to_op="Select Attributes (19)" to_port="example set input"/>
+              <connect from_op="Select Attributes (19)" from_port="example set output" to_op="clients_disp (3)" to_port="right"/>
+              <connect from_op="clients_disp (3)" from_port="join" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="client join district (3)" width="90" x="447" y="289">
+            <process expanded="true">
+              <operator activated="true" class="retrieve" compatibility="7.6.001" expanded="true" height="68" name="Retrieve district (3)" width="90" x="45" y="187">
+                <parameter key="repository_entry" value="//ECAC Project/data/raw/district"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (18)" width="90" x="45" y="85">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="district_id" value="code "/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="replace" compatibility="7.6.001" expanded="true" height="82" name="Replace (5)" width="90" x="313" y="85">
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="region"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="nominal"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="file_path"/>
+                <parameter key="block_type" value="single_value"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="single_value"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="replace_what" value="Prague"/>
+                <parameter key="replace_by" value="central Bohemia"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (20)" width="90" x="581" y="85">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="no. of cities |no. of commited crimes '95 |no. of commited crimes '96 |no. of enterpreneurs per 1000 inhabitants |no. of inhabitants|no. of municipalities with inhabitants 2000-9999 |no. of municipalities with inhabitants 500-1999|no. of municipalities with inhabitants &lt; 499 |no. of municipalities with inhabitants &gt;10000 |ratio of urban inhabitants |unemploymant rate '95 |name "/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="true"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="Join (18)" to_port="left"/>
+              <connect from_op="Retrieve district (3)" from_port="output" to_op="Join (18)" to_port="right"/>
+              <connect from_op="Join (18)" from_port="join" to_op="Replace (5)" to_port="example set input"/>
+              <connect from_op="Replace (5)" from_port="example set output" to_op="Select Attributes (20)" to_port="example set input"/>
+              <connect from_op="Select Attributes (20)" from_port="example set output" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="set_role" compatibility="7.6.001" expanded="true" height="82" name="Set Role (6)" width="90" x="45" y="34">
+            <parameter key="attribute_name" value="trans_id"/>
+            <parameter key="target_role" value="regular"/>
+            <list key="set_additional_roles"/>
+          </operator>
+          <operator activated="true" class="multiply" compatibility="7.6.001" expanded="true" height="103" name="Multiply trans (3)" width="90" x="179" y="34"/>
+          <operator activated="false" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="process trans (3)" width="90" x="447" y="34">
+            <process expanded="true">
+              <operator activated="true" class="replace" compatibility="7.6.001" expanded="true" height="82" name="Replace (6)" width="90" x="45" y="34">
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="type"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="nominal"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="file_path"/>
+                <parameter key="block_type" value="single_value"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="single_value"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="replace_what" value="withdrawal in cash"/>
+                <parameter key="replace_by" value="withdrawal"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (21)" width="90" x="45" y="238">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="account_id|amount|balance|date|type|trans_id"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="multiply" compatibility="7.6.001" expanded="true" height="103" name="Multiply (7)" width="90" x="179" y="238"/>
+              <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="Monthly Stats (3)" width="90" x="313" y="85">
+                <process expanded="true">
+                  <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical (10)" width="90" x="45" y="34">
+                    <parameter key="attribute_name" value="date"/>
+                    <parameter key="time_unit" value="month"/>
+                    <parameter key="millisecond_relative_to" value="second"/>
+                    <parameter key="second_relative_to" value="minute"/>
+                    <parameter key="minute_relative_to" value="hour"/>
+                    <parameter key="hour_relative_to" value="day"/>
+                    <parameter key="day_relative_to" value="month"/>
+                    <parameter key="week_relative_to" value="year"/>
+                    <parameter key="month_relative_to" value="epoch"/>
+                    <parameter key="quarter_relative_to" value="year"/>
+                    <parameter key="half_year_relative_to" value="year"/>
+                    <parameter key="year_relative_to" value="era"/>
+                    <parameter key="keep_old_attribute" value="true"/>
+                  </operator>
+                  <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate (9)" width="90" x="179" y="34">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="all"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="balance" value="average"/>
+                      <parameter key="balance" value="standard_deviation"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id|date_month"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate (10)" width="90" x="313" y="34">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="all"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="average(balance)" value="average"/>
+                      <parameter key="standard_deviation(balance)" value="average"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (15)" width="90" x="447" y="34">
+                    <parameter key="old_name" value="average(average(balance))"/>
+                    <parameter key="new_name" value="avg_monthly_balance"/>
+                    <list key="rename_additional_attributes">
+                      <parameter key="average(standard_deviation(balance))" value="monthly_balance_std_dev"/>
+                    </list>
+                  </operator>
+                  <connect from_port="in 1" to_op="Date to Numerical (10)" to_port="example set input"/>
+                  <connect from_op="Date to Numerical (10)" from_port="example set output" to_op="Aggregate (9)" to_port="example set input"/>
+                  <connect from_op="Aggregate (9)" from_port="example set output" to_op="Aggregate (10)" to_port="example set input"/>
+                  <connect from_op="Aggregate (10)" from_port="example set output" to_op="Rename (15)" to_port="example set input"/>
+                  <connect from_op="Rename (15)" from_port="example set output" to_port="out 1"/>
+                  <portSpacing port="source_in 1" spacing="0"/>
+                  <portSpacing port="source_in 2" spacing="0"/>
+                  <portSpacing port="sink_out 1" spacing="0"/>
+                  <portSpacing port="sink_out 2" spacing="0"/>
+                </process>
+              </operator>
+              <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="82" name="All Time Stats (3)" width="90" x="313" y="391">
+                <process expanded="true">
+                  <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate (11)" width="90" x="45" y="34">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="single"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="trans_id" value="count"/>
+                      <parameter key="date" value="maximum"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.001" expanded="true" height="82" name="Generate Attributes (3)" width="90" x="179" y="34">
+                    <list key="function_descriptions">
+                      <parameter key="last_trans" value="floor(date_diff([maximum(date)], date_parse(&quot;01/01/1997&quot;)) / (1000 * 60 * 60 * 24))"/>
+                    </list>
+                    <parameter key="keep_all" value="true"/>
+                  </operator>
+                  <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (22)" width="90" x="313" y="34">
+                    <parameter key="attribute_filter_type" value="subset"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value="maximum(date)"/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="true"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                  </operator>
+                  <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (16)" width="90" x="447" y="34">
+                    <parameter key="old_name" value="count(trans_id)"/>
+                    <parameter key="new_name" value="num_trans"/>
+                    <list key="rename_additional_attributes"/>
+                  </operator>
+                  <connect from_port="in 1" to_op="Aggregate (11)" to_port="example set input"/>
+                  <connect from_op="Aggregate (11)" from_port="example set output" to_op="Generate Attributes (3)" to_port="example set input"/>
+                  <connect from_op="Generate Attributes (3)" from_port="example set output" to_op="Select Attributes (22)" to_port="example set input"/>
+                  <connect from_op="Select Attributes (22)" from_port="example set output" to_op="Rename (16)" to_port="example set input"/>
+                  <connect from_op="Rename (16)" from_port="example set output" to_port="out 1"/>
+                  <portSpacing port="source_in 1" spacing="0"/>
+                  <portSpacing port="source_in 2" spacing="0"/>
+                  <portSpacing port="sink_out 1" spacing="0"/>
+                  <portSpacing port="sink_out 2" spacing="0"/>
+                </process>
+                <description align="center" color="yellow" colored="true" width="126">Days since last transaction&lt;br&gt;Number of transactions</description>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (19)" width="90" x="514" y="238">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <connect from_port="in 1" to_op="Replace (6)" to_port="example set input"/>
+              <connect from_op="Replace (6)" from_port="example set output" to_op="Select Attributes (21)" to_port="example set input"/>
+              <connect from_op="Select Attributes (21)" from_port="example set output" to_op="Multiply (7)" to_port="input"/>
+              <connect from_op="Multiply (7)" from_port="output 1" to_op="Monthly Stats (3)" to_port="in 1"/>
+              <connect from_op="Multiply (7)" from_port="output 2" to_op="All Time Stats (3)" to_port="in 1"/>
+              <connect from_op="Monthly Stats (3)" from_port="out 1" to_op="Join (19)" to_port="left"/>
+              <connect from_op="All Time Stats (3)" from_port="out 1" to_op="Join (19)" to_port="right"/>
+              <connect from_op="Join (19)" from_port="join" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="set_role" compatibility="7.6.001" expanded="true" height="82" name="Set Role (7)" width="90" x="112" y="136">
+            <parameter key="attribute_name" value="loan_id"/>
+            <parameter key="target_role" value="id"/>
+            <list key="set_additional_roles"/>
+          </operator>
+          <operator activated="true" class="subprocess" compatibility="7.6.001" expanded="true" height="103" name="add_balance_to_loan (3)" width="90" x="313" y="136">
+            <process expanded="true">
+              <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (17)" width="90" x="313" y="187">
+                <parameter key="old_name" value="date"/>
+                <parameter key="new_name" value="trans_date"/>
+                <list key="rename_additional_attributes"/>
+              </operator>
+              <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical (11)" width="90" x="447" y="187">
+                <parameter key="attribute_name" value="trans_date"/>
+                <parameter key="time_unit" value="millisecond"/>
+                <parameter key="millisecond_relative_to" value="epoch"/>
+                <parameter key="second_relative_to" value="epoch"/>
+                <parameter key="minute_relative_to" value="epoch"/>
+                <parameter key="hour_relative_to" value="epoch"/>
+                <parameter key="day_relative_to" value="month"/>
+                <parameter key="week_relative_to" value="year"/>
+                <parameter key="month_relative_to" value="year"/>
+                <parameter key="quarter_relative_to" value="year"/>
+                <parameter key="half_year_relative_to" value="year"/>
+                <parameter key="year_relative_to" value="era"/>
+                <parameter key="keep_old_attribute" value="false"/>
+              </operator>
+              <operator activated="true" class="multiply" compatibility="7.6.001" expanded="true" height="103" name="Multiply (8)" width="90" x="45" y="289"/>
+              <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (18)" width="90" x="45" y="34">
+                <parameter key="old_name" value="date"/>
+                <parameter key="new_name" value="date"/>
+                <list key="rename_additional_attributes"/>
+              </operator>
+              <operator activated="true" class="date_to_numerical" compatibility="7.6.001" expanded="true" height="82" name="Date to Numerical (12)" width="90" x="179" y="34">
+                <parameter key="attribute_name" value="date"/>
+                <parameter key="time_unit" value="millisecond"/>
+                <parameter key="millisecond_relative_to" value="epoch"/>
+                <parameter key="second_relative_to" value="epoch"/>
+                <parameter key="minute_relative_to" value="hour"/>
+                <parameter key="hour_relative_to" value="epoch"/>
+                <parameter key="day_relative_to" value="month"/>
+                <parameter key="week_relative_to" value="year"/>
+                <parameter key="month_relative_to" value="year"/>
+                <parameter key="quarter_relative_to" value="year"/>
+                <parameter key="half_year_relative_to" value="year"/>
+                <parameter key="year_relative_to" value="era"/>
+                <parameter key="keep_old_attribute" value="false"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (20)" width="90" x="313" y="34">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="python_scripting:execute_python" compatibility="7.4.000" expanded="true" height="82" name="Execute Python (6)" width="90" x="514" y="85">
+                <parameter key="script" value="import pandas&#10;&#10;# rm_main is a mandatory function, &#10;# the number of arguments has to be the number of input ports (can be none)&#10;def rm_main(data):&#10;&#10;    data['date'] = data['date'] - data['trans_date']&#10;    print(data['date'])&#10;    # connect 2 output ports to see the results&#10;    return data"/>
+              </operator>
+              <operator activated="true" class="multiply" compatibility="7.6.001" expanded="true" height="103" name="Multiply (9)" width="90" x="648" y="85"/>
+              <operator activated="true" class="aggregate" compatibility="7.6.001" expanded="true" height="82" name="Aggregate (12)" width="90" x="782" y="85">
+                <parameter key="use_default_aggregation" value="false"/>
+                <parameter key="attribute_filter_type" value="all"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="default_aggregation_function" value="average"/>
+                <list key="aggregation_attributes">
+                  <parameter key="date" value="minimum"/>
+                </list>
+                <parameter key="group_by_attributes" value="account_id"/>
+                <parameter key="count_all_combinations" value="false"/>
+                <parameter key="only_distinct" value="false"/>
+                <parameter key="ignore_missings" value="true"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (21)" width="90" x="514" y="289">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                  <parameter key="minimum(date)" value="date"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="remove_duplicates" compatibility="7.6.001" expanded="true" height="103" name="Remove Duplicates (3)" width="90" x="715" y="289">
+                <parameter key="attribute_filter_type" value="single"/>
+                <parameter key="attribute" value="account_id"/>
+                <parameter key="attributes" value=""/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="treat_missing_values_as_duplicates" value="false"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (23)" width="90" x="849" y="289">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="loan_id|balance"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (22)" width="90" x="916" y="391">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="inner"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="loan_id" value="loan_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (24)" width="90" x="1117" y="340">
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value=""/>
+                <parameter key="attributes" value="trans_id"/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="true"/>
+                <parameter key="include_special_attributes" value="false"/>
+              </operator>
+              <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (19)" width="90" x="1258" y="187">
+                <parameter key="old_name" value="balance"/>
+                <parameter key="new_name" value="loan_balance"/>
+                <list key="rename_additional_attributes"/>
+              </operator>
+              <connect from_port="in 1" to_op="Rename (17)" to_port="example set input"/>
+              <connect from_port="in 2" to_op="Multiply (8)" to_port="input"/>
+              <connect from_op="Rename (17)" from_port="example set output" to_op="Date to Numerical (11)" to_port="example set input"/>
+              <connect from_op="Date to Numerical (11)" from_port="example set output" to_op="Join (20)" to_port="right"/>
+              <connect from_op="Multiply (8)" from_port="output 1" to_op="Rename (18)" to_port="example set input"/>
+              <connect from_op="Multiply (8)" from_port="output 2" to_op="Join (22)" to_port="right"/>
+              <connect from_op="Rename (18)" from_port="example set output" to_op="Date to Numerical (12)" to_port="example set input"/>
+              <connect from_op="Date to Numerical (12)" from_port="example set output" to_op="Join (20)" to_port="left"/>
+              <connect from_op="Join (20)" from_port="join" to_op="Execute Python (6)" to_port="input 1"/>
+              <connect from_op="Execute Python (6)" from_port="output 1" to_op="Multiply (9)" to_port="input"/>
+              <connect from_op="Multiply (9)" from_port="output 1" to_op="Aggregate (12)" to_port="example set input"/>
+              <connect from_op="Multiply (9)" from_port="output 2" to_op="Join (21)" to_port="right"/>
+              <connect from_op="Aggregate (12)" from_port="example set output" to_op="Join (21)" to_port="left"/>
+              <connect from_op="Join (21)" from_port="join" to_op="Remove Duplicates (3)" to_port="example set input"/>
+              <connect from_op="Remove Duplicates (3)" from_port="example set output" to_op="Select Attributes (23)" to_port="example set input"/>
+              <connect from_op="Select Attributes (23)" from_port="example set output" to_op="Join (22)" to_port="left"/>
+              <connect from_op="Join (22)" from_port="join" to_op="Select Attributes (24)" to_port="example set input"/>
+              <connect from_op="Select Attributes (24)" from_port="example set output" to_op="Rename (19)" to_port="example set input"/>
+              <connect from_op="Rename (19)" from_port="example set output" to_port="out 1"/>
+              <portSpacing port="source_in 1" spacing="0"/>
+              <portSpacing port="source_in 2" spacing="0"/>
+              <portSpacing port="source_in 3" spacing="0"/>
+              <portSpacing port="sink_out 1" spacing="0"/>
+              <portSpacing port="sink_out 2" spacing="0"/>
+            </process>
+          </operator>
+          <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (23)" width="90" x="648" y="85">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="account_id" value="account_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="join" compatibility="7.6.001" expanded="true" height="82" name="Join (24)" width="90" x="782" y="34">
+            <parameter key="remove_double_attributes" value="true"/>
+            <parameter key="join_type" value="inner"/>
+            <parameter key="use_id_attribute_as_key" value="false"/>
+            <list key="key_attributes">
+              <parameter key="account_id" value="account_id"/>
+            </list>
+            <parameter key="keep_both_join_attributes" value="false"/>
+          </operator>
+          <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (25)" width="90" x="983" y="34">
+            <parameter key="attribute_filter_type" value="subset"/>
+            <parameter key="attribute" value=""/>
+            <parameter key="attributes" value="loan_id|age|amount|card_type|duration|frequency|issued|payments|region|sex|status|type|unemploymant rate '96 |avg_monthly_balance|last_trans|loan_balance|monthly_balance_std_dev|num_trans"/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="false"/>
+          </operator>
+          <connect from_port="in 1" to_op="Set Role (6)" to_port="example set input"/>
+          <connect from_port="in 2" to_op="Set Role (7)" to_port="example set input"/>
+          <connect from_port="in 3" to_op="cards join disp (3)" to_port="in 1"/>
+          <connect from_op="cards join disp (3)" from_port="out 1" to_op="cards join accounts (3)" to_port="in 1"/>
+          <connect from_op="cards join accounts (3)" from_port="out 1" to_op="cards join client (3)" to_port="in 1"/>
+          <connect from_op="cards join client (3)" from_port="out 1" to_op="client join district (3)" to_port="in 1"/>
+          <connect from_op="client join district (3)" from_port="out 1" to_op="Join (23)" to_port="right"/>
+          <connect from_op="Set Role (6)" from_port="example set output" to_op="Multiply trans (3)" to_port="input"/>
+          <connect from_op="Multiply trans (3)" from_port="output 1" to_op="Join (24)" to_port="left"/>
+          <connect from_op="Multiply trans (3)" from_port="output 2" to_op="add_balance_to_loan (3)" to_port="in 1"/>
+          <connect from_op="Set Role (7)" from_port="example set output" to_op="add_balance_to_loan (3)" to_port="in 2"/>
+          <connect from_op="add_balance_to_loan (3)" from_port="out 1" to_op="Join (23)" to_port="left"/>
+          <connect from_op="Join (23)" from_port="join" to_op="Join (24)" to_port="right"/>
+          <connect from_op="Join (24)" from_port="join" to_op="Select Attributes (25)" to_port="example set input"/>
+          <connect from_op="Select Attributes (25)" from_port="example set output" to_port="out 1"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="source_in 3" spacing="0"/>
+          <portSpacing port="source_in 4" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+          <portSpacing port="sink_out 2" spacing="0"/>
+        </process>
+      </operator>
+      <operator activated="false" class="subprocess" compatibility="7.6.001" expanded="true" height="103" name="apply and save" width="90" x="581" y="289">
+        <process expanded="true">
+          <operator activated="true" class="apply_model" compatibility="7.6.001" expanded="true" height="82" name="Apply Model (2)" width="90" x="45" y="136">
+            <list key="application_parameters"/>
+            <parameter key="create_view" value="false"/>
+          </operator>
+          <operator activated="true" class="rename" compatibility="7.6.001" expanded="true" height="82" name="Rename (13)" width="90" x="45" y="34">
+            <parameter key="old_name" value="prediction(status)"/>
+            <parameter key="new_name" value="Predicted"/>
+            <list key="rename_additional_attributes">
+              <parameter key="loan_id" value="id"/>
+            </list>
+          </operator>
+          <operator activated="true" class="select_attributes" compatibility="7.6.001" expanded="true" height="82" name="Select Attributes (16)" width="90" x="246" y="34">
+            <parameter key="attribute_filter_type" value="subset"/>
+            <parameter key="attribute" value=""/>
+            <parameter key="attributes" value="id|Predicted"/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="attribute_value"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="time"/>
+            <parameter key="block_type" value="attribute_block"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_matrix_row_start"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="true"/>
+          </operator>
+          <operator activated="true" class="format_numbers" compatibility="7.6.001" expanded="true" height="82" name="Format Numbers" width="90" x="313" y="187">
+            <parameter key="attribute_filter_type" value="single"/>
+            <parameter key="attribute" value="id"/>
+            <parameter key="attributes" value=""/>
+            <parameter key="use_except_expression" value="false"/>
+            <parameter key="value_type" value="numeric"/>
+            <parameter key="use_value_type_exception" value="false"/>
+            <parameter key="except_value_type" value="real"/>
+            <parameter key="block_type" value="value_series"/>
+            <parameter key="use_block_type_exception" value="false"/>
+            <parameter key="except_block_type" value="value_series_end"/>
+            <parameter key="invert_selection" value="false"/>
+            <parameter key="include_special_attributes" value="true"/>
+            <parameter key="format_type" value="integer"/>
+            <parameter key="locale" value="English (United States)"/>
+            <parameter key="use_grouping" value="false"/>
+          </operator>
+          <operator activated="true" class="write_csv" compatibility="7.6.001" expanded="true" height="82" name="Write CSV" width="90" x="514" y="136">
+            <parameter key="column_separator" value=","/>
+            <parameter key="write_attribute_names" value="true"/>
+            <parameter key="quote_nominal_values" value="false"/>
+            <parameter key="format_date_attributes" value="false"/>
+            <parameter key="append_to_file" value="false"/>
+            <parameter key="encoding" value="UTF-8"/>
+          </operator>
+          <operator activated="true" class="write_file" compatibility="7.6.001" expanded="true" height="68" name="Write File" width="90" x="648" y="136">
+            <parameter key="resource_type" value="file"/>
+            <parameter key="filename" value="C:\Users\Adam\Desktop\loan_pred.csv"/>
+            <parameter key="mime_type" value="application/octet-stream"/>
+          </operator>
+          <connect from_port="in 1" to_op="Apply Model (2)" to_port="model"/>
+          <connect from_port="in 2" to_op="Apply Model (2)" to_port="unlabelled data"/>
+          <connect from_op="Apply Model (2)" from_port="labelled data" to_op="Rename (13)" to_port="example set input"/>
+          <connect from_op="Rename (13)" from_port="example set output" to_op="Select Attributes (16)" to_port="example set input"/>
+          <connect from_op="Select Attributes (16)" from_port="example set output" to_op="Format Numbers" to_port="example set input"/>
+          <connect from_op="Format Numbers" from_port="example set output" to_op="Write CSV" to_port="input"/>
+          <connect from_op="Write CSV" from_port="file" to_op="Write File" to_port="file"/>
+          <portSpacing port="source_in 1" spacing="0"/>
+          <portSpacing port="source_in 2" spacing="0"/>
+          <portSpacing port="source_in 3" spacing="0"/>
+          <portSpacing port="sink_out 1" spacing="0"/>
+        </process>
+      </operator>
+      <connect from_op="Retrieve card_train" from_port="output" to_op="Prepare Data" to_port="in 3"/>
+      <connect from_op="Retrieve loan_train" from_port="output" to_op="Prepare Data" to_port="in 2"/>
+      <connect from_op="Retrieve trans_train (2)" from_port="output" to_op="Prepare Data" to_port="in 1"/>
       <connect from_op="Prepare Data" from_port="out 1" to_op="Set Role" to_port="example set input"/>
-      <connect from_op="Set Role" from_port="example set output" to_op="Cross Validation (2)" to_port="example set"/>
-      <connect from_op="Cross Validation (2)" from_port="performance 1" to_port="result 1"/>
+      <connect from_op="Set Role" from_port="example set output" to_op="Cross Validation" to_port="example set"/>
+      <connect from_op="Cross Validation" from_port="performance 1" to_port="result 1"/>
       <portSpacing port="source_input 1" spacing="0"/>
-      <portSpacing port="source_input 2" spacing="0"/>
       <portSpacing port="sink_result 1" spacing="0"/>
       <portSpacing port="sink_result 2" spacing="0"/>
     </process>
