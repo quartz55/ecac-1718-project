@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="7.6.003">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="7.6.003" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve card_train" width="90" x="112" y="34">
+        <parameter key="repository_entry" value="//ECAC Project/raw/card_train"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve loan_train" width="90" x="112" y="136">
+        <parameter key="repository_entry" value="//ECAC Project/raw/loan_train"/>
+      </operator>
+      <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve trans_train" width="90" x="112" y="238">
+        <parameter key="repository_entry" value="//ECAC Project/raw/trans_train"/>
+      </operator>
+      <connect from_op="Retrieve card_train" from_port="output" to_port="result 1"/>
+      <connect from_op="Retrieve loan_train" from_port="output" to_port="result 2"/>
+      <connect from_op="Retrieve trans_train" from_port="output" to_port="result 3"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <portSpacing port="sink_result 4" spacing="0"/>
+    </process>
+  </operator>
+</process>
