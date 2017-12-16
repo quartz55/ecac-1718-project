@@ -165,7 +165,7 @@
             <parameter key="create_view" value="false"/>
           </operator>
           <operator activated="true" class="performance_binominal_classification" compatibility="7.6.003" expanded="true" height="82" name="Performance" width="90" x="313" y="34">
-            <parameter key="main_criterion" value="AUC"/>
+            <parameter key="main_criterion" value="precision"/>
             <parameter key="accuracy" value="true"/>
             <parameter key="classification_error" value="true"/>
             <parameter key="kappa" value="true"/>

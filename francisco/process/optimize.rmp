@@ -587,9 +587,8 @@
       </operator>
       <operator activated="true" class="optimize_parameters_grid" compatibility="7.6.003" expanded="true" height="124" name="Optimize Parameters (4)" width="90" x="715" y="34">
         <list key="parameters">
-          <parameter key="SVM (4).C" value="[0;20;20;linear]"/>
-          <parameter key="SVM (4).epsilon" value="[0.0;1;200;linear]"/>
-          <parameter key="SVM (4).convergence_epsilon" value="[0.0;1;200;linear]"/>
+          <parameter key="SVM (4).epsilon" value="[0.0;1;20;linear]"/>
+          <parameter key="SVM (4).convergence_epsilon" value="[0.0;1;20;linear]"/>
         </list>
         <parameter key="error_handling" value="fail on error"/>
         <process expanded="true">
@@ -597,7 +596,7 @@
             <parameter key="split_on_batch_attribute" value="false"/>
             <parameter key="leave_one_out" value="false"/>
             <parameter key="number_of_folds" value="10"/>
-            <parameter key="sampling_type" value="automatic"/>
+            <parameter key="sampling_type" value="linear sampling"/>
             <parameter key="use_local_random_seed" value="false"/>
             <parameter key="local_random_seed" value="1992"/>
             <parameter key="enable_parallel_execution" value="true"/>
@@ -625,14 +624,14 @@
                 <parameter key="kernel_b" value="0.0"/>
                 <parameter key="kernel_cache" value="200"/>
                 <parameter key="C" value="1.0"/>
-                <parameter key="convergence_epsilon" value="0.0"/>
+                <parameter key="convergence_epsilon" value="1.0"/>
                 <parameter key="max_iterations" value="100000"/>
                 <parameter key="scale" value="true"/>
                 <parameter key="calculate_weights" value="true"/>
                 <parameter key="return_optimization_performance" value="true"/>
                 <parameter key="L_pos" value="1.0"/>
                 <parameter key="L_neg" value="1.0"/>
-                <parameter key="epsilon" value="0.0"/>
+                <parameter key="epsilon" value="1.0"/>
                 <parameter key="epsilon_plus" value="0.0"/>
                 <parameter key="epsilon_minus" value="0.0"/>
                 <parameter key="balance_cost" value="false"/>
@@ -667,8 +666,8 @@
                 <list key="application_parameters"/>
                 <parameter key="create_view" value="false"/>
               </operator>
-              <operator activated="true" class="performance_binominal_classification" compatibility="7.6.003" expanded="true" height="82" name="Performance (4)" width="90" x="313" y="34">
-                <parameter key="main_criterion" value="precision"/>
+              <operator activated="true" class="performance_binominal_classification" compatibility="7.6.003" expanded="true" height="82" name="per" width="90" x="313" y="34">
+                <parameter key="main_criterion" value="AUC"/>
                 <parameter key="accuracy" value="true"/>
                 <parameter key="classification_error" value="true"/>
                 <parameter key="kappa" value="true"/>
@@ -695,8 +694,8 @@
               </operator>
               <connect from_port="model" to_op="Apply Model (4)" to_port="model"/>
               <connect from_port="test set" to_op="Apply Model (4)" to_port="unlabelled data"/>
-              <connect from_op="Apply Model (4)" from_port="labelled data" to_op="Performance (4)" to_port="labelled data"/>
-              <connect from_op="Performance (4)" from_port="performance" to_port="performance 1"/>
+              <connect from_op="Apply Model (4)" from_port="labelled data" to_op="per" to_port="labelled data"/>
+              <connect from_op="per" from_port="performance" to_port="performance 1"/>
               <portSpacing port="source_model" spacing="0"/>
               <portSpacing port="source_test set" spacing="0"/>
               <portSpacing port="source_through 1" spacing="0"/>
@@ -705,11 +704,11 @@
               <portSpacing port="sink_performance 2" spacing="0"/>
             </process>
           </operator>
-          <operator activated="false" class="log" compatibility="7.6.003" expanded="true" height="68" name="Log (3)" width="90" x="581" y="544">
+          <operator activated="true" class="log" compatibility="7.6.003" expanded="true" height="82" name="Log (3)" width="90" x="581" y="493">
             <list key="log">
-              <parameter key="C" value="operator.SVM (3).parameter.C"/>
-              <parameter key="gamma" value="operator.SVM (3).parameter.gamma"/>
-              <parameter key="AUC" value="operator.Cross Validation.value.performance 1"/>
+              <parameter key="C" value="operator.SVM (4).parameter.epsilon"/>
+              <parameter key="gamma" value="operator.SVM (4).parameter.convergence_epsilon"/>
+              <parameter key="AUC" value="operator.Cross Validation (4).value.performance 1"/>
             </list>
             <parameter key="sorting_type" value="none"/>
             <parameter key="sorting_k" value="100"/>
@@ -819,7 +818,8 @@
           </operator>
           <connect from_port="input 1" to_op="Cross Validation (4)" to_port="example set"/>
           <connect from_op="Cross Validation (4)" from_port="model" to_port="result 1"/>
-          <connect from_op="Cross Validation (4)" from_port="performance 1" to_port="performance"/>
+          <connect from_op="Cross Validation (4)" from_port="performance 1" to_op="Log (3)" to_port="through 1"/>
+          <connect from_op="Log (3)" from_port="through 1" to_port="performance"/>
           <portSpacing port="source_input 1" spacing="0"/>
           <portSpacing port="source_input 2" spacing="0"/>
           <portSpacing port="sink_performance" spacing="0"/>
