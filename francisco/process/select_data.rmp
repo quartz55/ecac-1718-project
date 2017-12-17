@@ -12,7 +12,7 @@
     <parameter key="process_duration_for_mail" value="30"/>
     <parameter key="encoding" value="SYSTEM"/>
     <process expanded="true">
-      <operator activated="true" class="subprocess" compatibility="7.6.003" expanded="true" height="124" name="clean data" width="90" x="313" y="34">
+      <operator activated="true" class="subprocess" compatibility="7.6.003" expanded="true" height="124" name="clean data" width="90" x="313" y="85">
         <process expanded="true">
           <operator activated="true" class="subprocess" compatibility="7.6.003" expanded="true" height="124" name="Subprocess (2)" width="90" x="112" y="34">
             <process expanded="true">
@@ -27,16 +27,34 @@
               <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve district" width="90" x="179" y="238">
                 <parameter key="repository_entry" value="//ECAC Project/raw/district"/>
               </operator>
-              <operator activated="true" class="subprocess" compatibility="7.6.003" expanded="true" height="82" name="diff trans" width="90" x="112" y="595">
+              <operator activated="true" class="replace_missing_values" compatibility="7.6.003" expanded="true" height="103" name="Replace Missing Values" width="90" x="313" y="238">
+                <parameter key="return_preprocessing_model" value="false"/>
+                <parameter key="create_view" value="false"/>
+                <parameter key="attribute_filter_type" value="subset"/>
+                <parameter key="attribute" value="no. of commited crimes '95 "/>
+                <parameter key="attributes" value="unemploymant rate '95 |no. of commited crimes '95 "/>
+                <parameter key="use_except_expression" value="false"/>
+                <parameter key="value_type" value="attribute_value"/>
+                <parameter key="use_value_type_exception" value="false"/>
+                <parameter key="except_value_type" value="time"/>
+                <parameter key="block_type" value="attribute_block"/>
+                <parameter key="use_block_type_exception" value="false"/>
+                <parameter key="except_block_type" value="value_matrix_row_start"/>
+                <parameter key="invert_selection" value="false"/>
+                <parameter key="include_special_attributes" value="false"/>
+                <parameter key="default" value="average"/>
+                <list key="columns"/>
+              </operator>
+              <operator activated="true" class="subprocess" compatibility="7.6.003" expanded="true" height="82" name="has_neg_bal" width="90" x="112" y="595">
                 <process expanded="true">
-                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="year month" width="90" x="112" y="34">
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="year month" width="90" x="45" y="85">
                     <list key="function_descriptions">
                       <parameter key="month" value="date_get(date,DATE_UNIT_MONTH) + 1"/>
                       <parameter key="year" value="date_get(date,DATE_UNIT_YEAR)"/>
                     </list>
                     <parameter key="keep_all" value="true"/>
                   </operator>
-                  <operator activated="true" class="map" compatibility="7.6.003" expanded="true" height="82" name="Map" width="90" x="246" y="34">
+                  <operator activated="true" class="map" compatibility="7.6.003" expanded="true" height="82" name="Map" width="90" x="179" y="34">
                     <parameter key="attribute_filter_type" value="single"/>
                     <parameter key="attribute" value="type"/>
                     <parameter key="attributes" value=""/>
@@ -55,7 +73,7 @@
                     <parameter key="consider_regular_expressions" value="false"/>
                     <parameter key="add_default_mapping" value="false"/>
                   </operator>
-                  <operator activated="true" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate (2)" width="90" x="447" y="34">
+                  <operator activated="true" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate (7)" width="90" x="313" y="34">
                     <parameter key="use_default_aggregation" value="false"/>
                     <parameter key="attribute_filter_type" value="all"/>
                     <parameter key="attribute" value=""/>
@@ -71,45 +89,20 @@
                     <parameter key="include_special_attributes" value="false"/>
                     <parameter key="default_aggregation_function" value="average"/>
                     <list key="aggregation_attributes">
-                      <parameter key="amount" value="average"/>
-                      <parameter key="balance" value="average"/>
-                    </list>
-                    <parameter key="group_by_attributes" value="account_id|type|month|year"/>
-                    <parameter key="count_all_combinations" value="false"/>
-                    <parameter key="only_distinct" value="false"/>
-                    <parameter key="ignore_missings" value="true"/>
-                  </operator>
-                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="diff" width="90" x="581" y="34">
-                    <list key="function_descriptions">
-                      <parameter key="diff" value="if(type==&quot;withdrawal&quot;, -[average(amount)], [average(amount)])"/>
-                    </list>
-                    <parameter key="keep_all" value="true"/>
-                  </operator>
-                  <operator activated="true" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate (3)" width="90" x="447" y="187">
-                    <parameter key="use_default_aggregation" value="false"/>
-                    <parameter key="attribute_filter_type" value="all"/>
-                    <parameter key="attribute" value=""/>
-                    <parameter key="attributes" value=""/>
-                    <parameter key="use_except_expression" value="false"/>
-                    <parameter key="value_type" value="attribute_value"/>
-                    <parameter key="use_value_type_exception" value="false"/>
-                    <parameter key="except_value_type" value="time"/>
-                    <parameter key="block_type" value="attribute_block"/>
-                    <parameter key="use_block_type_exception" value="false"/>
-                    <parameter key="except_block_type" value="value_matrix_row_start"/>
-                    <parameter key="invert_selection" value="false"/>
-                    <parameter key="include_special_attributes" value="false"/>
-                    <parameter key="default_aggregation_function" value="average"/>
-                    <list key="aggregation_attributes">
-                      <parameter key="diff" value="sum"/>
-                      <parameter key="average(balance)" value="average"/>
+                      <parameter key="balance" value="minimum"/>
                     </list>
                     <parameter key="group_by_attributes" value="account_id"/>
                     <parameter key="count_all_combinations" value="false"/>
                     <parameter key="only_distinct" value="false"/>
                     <parameter key="ignore_missings" value="true"/>
                   </operator>
-                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (6)" width="90" x="380" y="340">
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="has_neg_balance" width="90" x="514" y="34">
+                    <list key="function_descriptions">
+                      <parameter key="has_neg_balance" value="if([minimum(balance)]&lt;0,1,0)"/>
+                    </list>
+                    <parameter key="keep_all" value="true"/>
+                  </operator>
+                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (11)" width="90" x="313" y="187">
                     <parameter key="remove_double_attributes" value="true"/>
                     <parameter key="join_type" value="inner"/>
                     <parameter key="use_id_attribute_as_key" value="false"/>
@@ -118,13 +111,70 @@
                     </list>
                     <parameter key="keep_both_join_attributes" value="false"/>
                   </operator>
+                  <operator activated="true" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate (2)" width="90" x="514" y="238">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="all"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="balance" value="average"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
+                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (6)" width="90" x="715" y="238">
+                    <parameter key="remove_double_attributes" value="true"/>
+                    <parameter key="join_type" value="inner"/>
+                    <parameter key="use_id_attribute_as_key" value="false"/>
+                    <list key="key_attributes">
+                      <parameter key="account_id" value="account_id"/>
+                    </list>
+                    <parameter key="keep_both_join_attributes" value="false"/>
+                  </operator>
+                  <operator activated="false" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate (3)" width="90" x="648" y="391">
+                    <parameter key="use_default_aggregation" value="false"/>
+                    <parameter key="attribute_filter_type" value="all"/>
+                    <parameter key="attribute" value=""/>
+                    <parameter key="attributes" value=""/>
+                    <parameter key="use_except_expression" value="false"/>
+                    <parameter key="value_type" value="attribute_value"/>
+                    <parameter key="use_value_type_exception" value="false"/>
+                    <parameter key="except_value_type" value="time"/>
+                    <parameter key="block_type" value="attribute_block"/>
+                    <parameter key="use_block_type_exception" value="false"/>
+                    <parameter key="except_block_type" value="value_matrix_row_start"/>
+                    <parameter key="invert_selection" value="false"/>
+                    <parameter key="include_special_attributes" value="false"/>
+                    <parameter key="default_aggregation_function" value="average"/>
+                    <list key="aggregation_attributes">
+                      <parameter key="average(balance)" value="minimum"/>
+                    </list>
+                    <parameter key="group_by_attributes" value="account_id"/>
+                    <parameter key="count_all_combinations" value="false"/>
+                    <parameter key="only_distinct" value="false"/>
+                    <parameter key="ignore_missings" value="true"/>
+                  </operator>
                   <connect from_port="in 1" to_op="year month" to_port="example set input"/>
                   <connect from_op="year month" from_port="example set output" to_op="Map" to_port="example set input"/>
-                  <connect from_op="Map" from_port="example set output" to_op="Aggregate (2)" to_port="example set input"/>
-                  <connect from_op="Map" from_port="original" to_op="Join (6)" to_port="right"/>
-                  <connect from_op="Aggregate (2)" from_port="example set output" to_op="diff" to_port="example set input"/>
-                  <connect from_op="diff" from_port="example set output" to_op="Aggregate (3)" to_port="example set input"/>
-                  <connect from_op="Aggregate (3)" from_port="example set output" to_op="Join (6)" to_port="left"/>
+                  <connect from_op="Map" from_port="example set output" to_op="Aggregate (7)" to_port="example set input"/>
+                  <connect from_op="Aggregate (7)" from_port="example set output" to_op="has_neg_balance" to_port="example set input"/>
+                  <connect from_op="Aggregate (7)" from_port="original" to_op="Join (11)" to_port="right"/>
+                  <connect from_op="has_neg_balance" from_port="example set output" to_op="Join (11)" to_port="left"/>
+                  <connect from_op="Join (11)" from_port="join" to_op="Aggregate (2)" to_port="example set input"/>
+                  <connect from_op="Aggregate (2)" from_port="example set output" to_op="Join (6)" to_port="left"/>
+                  <connect from_op="Aggregate (2)" from_port="original" to_op="Join (6)" to_port="right"/>
                   <connect from_op="Join (6)" from_port="join" to_port="out 1"/>
                   <portSpacing port="source_in 1" spacing="0"/>
                   <portSpacing port="source_in 2" spacing="0"/>
@@ -197,7 +247,7 @@
                     <parameter key="only_distinct" value="false"/>
                     <parameter key="ignore_missings" value="true"/>
                   </operator>
-                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (8)" width="90" x="313" y="238">
+                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (8)" width="90" x="380" y="187">
                     <parameter key="remove_double_attributes" value="true"/>
                     <parameter key="join_type" value="right"/>
                     <parameter key="use_id_attribute_as_key" value="false"/>
@@ -206,13 +256,20 @@
                     </list>
                     <parameter key="keep_both_join_attributes" value="false"/>
                   </operator>
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="Generate Attributes (3)" width="90" x="581" y="187">
+                    <list key="function_descriptions">
+                      <parameter key="pay_ins" value="if([sum(insurrance payment)]&gt;0,1,0)"/>
+                    </list>
+                    <parameter key="keep_all" value="true"/>
+                  </operator>
                   <connect from_port="in 1" to_op="Multiply" to_port="input"/>
                   <connect from_op="Multiply" from_port="output 1" to_op="Aggregate (4)" to_port="example set input"/>
                   <connect from_op="Multiply" from_port="output 2" to_op="Join (8)" to_port="right"/>
                   <connect from_op="Aggregate (4)" from_port="example set output" to_op="k_symbol" to_port="example set input"/>
                   <connect from_op="k_symbol" from_port="example set output" to_op="Aggregate (5)" to_port="example set input"/>
                   <connect from_op="Aggregate (5)" from_port="example set output" to_op="Join (8)" to_port="left"/>
-                  <connect from_op="Join (8)" from_port="join" to_port="out 1"/>
+                  <connect from_op="Join (8)" from_port="join" to_op="Generate Attributes (3)" to_port="example set input"/>
+                  <connect from_op="Generate Attributes (3)" from_port="example set output" to_port="out 1"/>
                   <portSpacing port="source_in 1" spacing="0"/>
                   <portSpacing port="source_in 2" spacing="0"/>
                   <portSpacing port="sink_out 1" spacing="0"/>
@@ -268,7 +325,7 @@
               <operator activated="true" class="select_attributes" compatibility="7.6.003" expanded="true" height="82" name="Select Attributes" width="90" x="514" y="595">
                 <parameter key="attribute_filter_type" value="subset"/>
                 <parameter key="attribute" value=""/>
-                <parameter key="attributes" value="account_id|maximum(date)|sum(diff)|sum(household)|sum(insurrance payment)|sum(interest credited)|sum(old-age pension)|sum(payment for statement)|sum(sanction interest if negative balance)|average(average(balance))"/>
+                <parameter key="attributes" value="account_id|average(balance)|has_neg_balance|maximum(date)|pay_ins|sum(household)|sum(insurrance payment)|sum(interest credited)|sum(payment for statement)|sum(sanction interest if negative balance)|sum(diff)|average(average(balance))|minimum(average(balance))"/>
                 <parameter key="use_except_expression" value="false"/>
                 <parameter key="value_type" value="attribute_value"/>
                 <parameter key="use_value_type_exception" value="false"/>
@@ -296,13 +353,13 @@
               </operator>
               <operator activated="true" class="subprocess" compatibility="7.6.003" expanded="true" height="82" name="Subprocess" width="90" x="313" y="34">
                 <process expanded="true">
-                  <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve client" width="90" x="45" y="187">
+                  <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve client" width="90" x="112" y="340">
                     <parameter key="repository_entry" value="//ECAC Project/raw/client"/>
                   </operator>
-                  <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve disp" width="90" x="45" y="85">
+                  <operator activated="true" class="retrieve" compatibility="7.6.003" expanded="true" height="68" name="Retrieve disp" width="90" x="45" y="187">
                     <parameter key="repository_entry" value="//ECAC Project/raw/disp"/>
                   </operator>
-                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join" width="90" x="179" y="85">
+                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join" width="90" x="246" y="238">
                     <parameter key="remove_double_attributes" value="true"/>
                     <parameter key="join_type" value="inner"/>
                     <parameter key="use_id_attribute_as_key" value="false"/>
@@ -311,13 +368,13 @@
                     </list>
                     <parameter key="keep_both_join_attributes" value="false"/>
                   </operator>
-                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="has_disponent" width="90" x="313" y="136">
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="has_disponent" width="90" x="380" y="289">
                     <list key="function_descriptions">
                       <parameter key="has_disponent" value="if(type==&quot;DISPONENT&quot;,1,0)"/>
                     </list>
                     <parameter key="keep_all" value="true"/>
                   </operator>
-                  <operator activated="true" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate" width="90" x="380" y="34">
+                  <operator activated="true" class="aggregate" compatibility="7.6.003" expanded="true" height="82" name="Aggregate" width="90" x="380" y="85">
                     <parameter key="use_default_aggregation" value="false"/>
                     <parameter key="attribute_filter_type" value="all"/>
                     <parameter key="attribute" value=""/>
@@ -340,7 +397,7 @@
                     <parameter key="only_distinct" value="false"/>
                     <parameter key="ignore_missings" value="true"/>
                   </operator>
-                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (2)" width="90" x="514" y="136">
+                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (2)" width="90" x="581" y="187">
                     <parameter key="remove_double_attributes" value="true"/>
                     <parameter key="join_type" value="inner"/>
                     <parameter key="use_id_attribute_as_key" value="false"/>
@@ -349,17 +406,36 @@
                     </list>
                     <parameter key="keep_both_join_attributes" value="false"/>
                   </operator>
-                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="Generate Attributes" width="90" x="648" y="136">
-                    <list key="function_descriptions"/>
+                  <operator activated="true" class="rename" compatibility="7.6.003" expanded="true" height="82" name="Rename (4)" width="90" x="179" y="34">
+                    <parameter key="old_name" value="type"/>
+                    <parameter key="new_name" value="card_type"/>
+                    <list key="rename_additional_attributes"/>
+                  </operator>
+                  <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (4)" width="90" x="648" y="34">
+                    <parameter key="remove_double_attributes" value="true"/>
+                    <parameter key="join_type" value="right"/>
+                    <parameter key="use_id_attribute_as_key" value="false"/>
+                    <list key="key_attributes">
+                      <parameter key="disp_id" value="disp_id"/>
+                    </list>
+                    <parameter key="keep_both_join_attributes" value="false"/>
+                  </operator>
+                  <operator activated="true" class="generate_attributes" compatibility="7.6.003" expanded="true" height="82" name="Generate Attributes" width="90" x="782" y="34">
+                    <list key="function_descriptions">
+                      <parameter key="has_card" value="if(issued==MISSING_DATE,0,1)"/>
+                    </list>
                     <parameter key="keep_all" value="true"/>
                   </operator>
+                  <connect from_port="in 1" to_op="Rename (4)" to_port="example set input"/>
                   <connect from_op="Retrieve client" from_port="output" to_op="Join" to_port="right"/>
                   <connect from_op="Retrieve disp" from_port="output" to_op="Join" to_port="left"/>
                   <connect from_op="Join" from_port="join" to_op="has_disponent" to_port="example set input"/>
                   <connect from_op="has_disponent" from_port="example set output" to_op="Aggregate" to_port="example set input"/>
                   <connect from_op="has_disponent" from_port="original" to_op="Join (2)" to_port="right"/>
                   <connect from_op="Aggregate" from_port="example set output" to_op="Join (2)" to_port="left"/>
-                  <connect from_op="Join (2)" from_port="join" to_op="Generate Attributes" to_port="example set input"/>
+                  <connect from_op="Join (2)" from_port="join" to_op="Join (4)" to_port="right"/>
+                  <connect from_op="Rename (4)" from_port="example set output" to_op="Join (4)" to_port="left"/>
+                  <connect from_op="Join (4)" from_port="join" to_op="Generate Attributes" to_port="example set input"/>
                   <connect from_op="Generate Attributes" from_port="example set output" to_port="out 1"/>
                   <portSpacing port="source_in 1" spacing="0"/>
                   <portSpacing port="source_in 2" spacing="0"/>
@@ -376,7 +452,7 @@
                 </list>
                 <parameter key="keep_both_join_attributes" value="false"/>
               </operator>
-              <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (5)" width="90" x="447" y="238">
+              <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (5)" width="90" x="581" y="238">
                 <parameter key="remove_double_attributes" value="true"/>
                 <parameter key="join_type" value="inner"/>
                 <parameter key="use_id_attribute_as_key" value="false"/>
@@ -390,16 +466,7 @@
                 <parameter key="new_name" value="loan_date"/>
                 <list key="rename_additional_attributes"/>
               </operator>
-              <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (7)" width="90" x="380" y="391">
-                <parameter key="remove_double_attributes" value="true"/>
-                <parameter key="join_type" value="inner"/>
-                <parameter key="use_id_attribute_as_key" value="false"/>
-                <list key="key_attributes">
-                  <parameter key="account_id" value="account_id"/>
-                </list>
-                <parameter key="keep_both_join_attributes" value="false"/>
-              </operator>
-              <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (10)" width="90" x="715" y="391">
+              <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (7)" width="90" x="782" y="391">
                 <parameter key="remove_double_attributes" value="true"/>
                 <parameter key="join_type" value="left"/>
                 <parameter key="use_id_attribute_as_key" value="false"/>
@@ -408,22 +475,32 @@
                 </list>
                 <parameter key="keep_both_join_attributes" value="false"/>
               </operator>
+              <operator activated="true" class="join" compatibility="7.6.003" expanded="true" height="82" name="Join (10)" width="90" x="782" y="238">
+                <parameter key="remove_double_attributes" value="true"/>
+                <parameter key="join_type" value="right"/>
+                <parameter key="use_id_attribute_as_key" value="false"/>
+                <list key="key_attributes">
+                  <parameter key="account_id" value="account_id"/>
+                </list>
+                <parameter key="keep_both_join_attributes" value="false"/>
+              </operator>
               <connect from_port="in 1" to_op="Subprocess" to_port="in 1"/>
               <connect from_port="in 2" to_op="Rename (2)" to_port="example set input"/>
-              <connect from_port="in 3" to_op="diff trans" to_port="in 1"/>
+              <connect from_port="in 3" to_op="has_neg_bal" to_port="in 1"/>
               <connect from_op="Retrieve account" from_port="output" to_op="Rename" to_port="example set input"/>
               <connect from_op="Rename" from_port="example set output" to_op="Join (3)" to_port="right"/>
-              <connect from_op="Retrieve district" from_port="output" to_op="Join (5)" to_port="right"/>
-              <connect from_op="diff trans" from_port="out 1" to_op="k_symbols att" to_port="in 1"/>
+              <connect from_op="Retrieve district" from_port="output" to_op="Replace Missing Values" to_port="example set input"/>
+              <connect from_op="Replace Missing Values" from_port="example set output" to_op="Join (5)" to_port="right"/>
+              <connect from_op="has_neg_bal" from_port="out 1" to_op="k_symbols att" to_port="in 1"/>
               <connect from_op="k_symbols att" from_port="out 1" to_op="last trans" to_port="in 1"/>
               <connect from_op="last trans" from_port="out 1" to_op="Select Attributes" to_port="example set input"/>
               <connect from_op="Select Attributes" from_port="example set output" to_op="Remove Duplicates" to_port="example set input"/>
-              <connect from_op="Remove Duplicates" from_port="example set output" to_op="Join (10)" to_port="right"/>
+              <connect from_op="Remove Duplicates" from_port="example set output" to_op="Join (7)" to_port="right"/>
               <connect from_op="Subprocess" from_port="out 1" to_op="Join (3)" to_port="left"/>
               <connect from_op="Join (3)" from_port="join" to_op="Join (5)" to_port="left"/>
-              <connect from_op="Join (5)" from_port="join" to_op="Join (7)" to_port="left"/>
-              <connect from_op="Rename (2)" from_port="example set output" to_op="Join (7)" to_port="right"/>
-              <connect from_op="Join (7)" from_port="join" to_op="Join (10)" to_port="left"/>
+              <connect from_op="Join (5)" from_port="join" to_op="Join (10)" to_port="left"/>
+              <connect from_op="Rename (2)" from_port="example set output" to_op="Join (7)" to_port="left"/>
+              <connect from_op="Join (7)" from_port="join" to_op="Join (10)" to_port="right"/>
               <connect from_op="Join (10)" from_port="join" to_port="out 1"/>
               <portSpacing port="source_in 1" spacing="0"/>
               <portSpacing port="source_in 2" spacing="0"/>
@@ -439,11 +516,11 @@
                 <list key="function_descriptions">
                   <parameter key="acc_age_months" value="round((date_diff(acc_date,loan_date)/1000)/(31556952/12))"/>
                   <parameter key="cli_age" value="round((date_diff(dob,loan_date)/1000)/31556952)"/>
-                  <parameter key="day_last_trans" value="((date_diff([maximum(date)],loan_date)/1000)/60)/60"/>
+                  <parameter key="day_last_trans" value="round((((date_diff([maximum(date)],loan_date)/1000)/60)/60)/24)"/>
                 </list>
                 <parameter key="keep_all" value="true"/>
               </operator>
-              <operator activated="true" class="filter_examples" compatibility="7.6.003" expanded="true" height="103" name="Filter Examples" width="90" x="179" y="34">
+              <operator activated="true" class="filter_examples" compatibility="7.6.003" expanded="true" height="103" name="Filter Examples" width="90" x="246" y="34">
                 <parameter key="parameter_expression" value=""/>
                 <parameter key="condition_class" value="custom_filters"/>
                 <parameter key="invert_filter" value="false"/>
@@ -453,10 +530,10 @@
                 <parameter key="filters_logic_and" value="true"/>
                 <parameter key="filters_check_metadata" value="true"/>
               </operator>
-              <operator activated="true" class="select_attributes" compatibility="7.6.003" expanded="true" height="82" name="Select Attributes (2)" width="90" x="313" y="34">
+              <operator activated="true" class="select_attributes" compatibility="7.6.003" expanded="true" height="82" name="Select Attributes (2)" width="90" x="447" y="85">
                 <parameter key="attribute_filter_type" value="subset"/>
                 <parameter key="attribute" value=""/>
-                <parameter key="attributes" value="acc_age_months|amount|average salary |average(average(balance))|cli_age|day_last_trans|duration|frequency|loan_id|name |no. of cities |no. of commited crimes '95 |no. of commited crimes '96 |no. of enterpreneurs per 1000 inhabitants |no. of inhabitants|no. of municipalities with inhabitants 2000-9999 |no. of municipalities with inhabitants 500-1999|no. of municipalities with inhabitants &lt; 499 |no. of municipalities with inhabitants &gt;10000 |payments|ratio of urban inhabitants |region|sex|status|sum(diff)|sum(has_disponent)|sum(household)|sum(insurrance payment)|sum(interest credited)|sum(old-age pension)|sum(payment for statement)|sum(sanction interest if negative balance)|unemploymant rate '95 |unemploymant rate '96 "/>
+                <parameter key="attributes" value="acc_age_months|amount|average salary |cli_age|day_last_trans|duration|frequency|loan_id|name |no. of cities |no. of commited crimes '95 |no. of commited crimes '96 |no. of enterpreneurs per 1000 inhabitants |no. of inhabitants|no. of municipalities with inhabitants 2000-9999 |no. of municipalities with inhabitants 500-1999|no. of municipalities with inhabitants &lt; 499 |no. of municipalities with inhabitants &gt;10000 |payments|ratio of urban inhabitants |region|sex|status|sum(has_disponent)|sum(household)|sum(insurrance payment)|sum(interest credited)|sum(payment for statement)|sum(sanction interest if negative balance)|unemploymant rate '95 |unemploymant rate '96 |sum(diff)|sum(old-age pension)|average(balance)|has_card|has_neg_balance|pay_ins"/>
                 <parameter key="use_except_expression" value="false"/>
                 <parameter key="value_type" value="attribute_value"/>
                 <parameter key="use_value_type_exception" value="false"/>
@@ -467,21 +544,19 @@
                 <parameter key="invert_selection" value="false"/>
                 <parameter key="include_special_attributes" value="false"/>
               </operator>
-              <operator activated="true" class="rename" compatibility="7.6.003" expanded="true" height="82" name="Rename (3)" width="90" x="447" y="34">
-                <parameter key="old_name" value="average(average(balance))"/>
+              <operator activated="true" class="rename" compatibility="7.6.003" expanded="true" height="82" name="Rename (3)" width="90" x="648" y="85">
+                <parameter key="old_name" value="average(balance)"/>
                 <parameter key="new_name" value="avg_balance"/>
                 <list key="rename_additional_attributes">
-                  <parameter key="sum(diff)" value="avg_diff_credit_debit"/>
                   <parameter key="sum(has_disponent)" value="has_disponent"/>
                   <parameter key="sum(household)" value="avg_household"/>
                   <parameter key="sum(insurrance payment)" value="avg_insurance_payment"/>
                   <parameter key="sum(interest credited)" value="avg_interest_credited"/>
-                  <parameter key="sum(old-age pension)" value="avg_old_age_pension"/>
                   <parameter key="sum(payment for statement)" value="avg_pay_statement"/>
                   <parameter key="sum(sanction interest if negative balance)" value="avg_neg_balance"/>
                 </list>
               </operator>
-              <operator activated="true" class="map" compatibility="7.6.003" expanded="true" height="82" name="Map (2)" width="90" x="581" y="34">
+              <operator activated="true" class="map" compatibility="7.6.003" expanded="true" height="82" name="Map (2)" width="90" x="782" y="136">
                 <parameter key="attribute_filter_type" value="single"/>
                 <parameter key="attribute" value="region"/>
                 <parameter key="attributes" value=""/>

@@ -12,16 +12,7 @@
     <parameter key="process_duration_for_mail" value="30"/>
     <parameter key="encoding" value="SYSTEM"/>
     <process expanded="true">
-      <operator activated="true" class="productivity:execute_process" compatibility="7.6.003" expanded="true" height="82" name="Execute back_elim" width="90" x="112" y="136">
-        <parameter key="process_location" value="//ECAC Project/francisco/process/back_elim"/>
-        <parameter key="use_input" value="true"/>
-        <parameter key="store_output" value="false"/>
-        <parameter key="propagate_metadata_recursively" value="true"/>
-        <parameter key="cache_process" value="true"/>
-        <list key="macros"/>
-        <parameter key="fail_for_unknown_macros" value="true"/>
-      </operator>
-      <operator activated="true" class="nominal_to_numerical" compatibility="7.6.003" expanded="true" height="103" name="Nominal to Numerical (3)" width="90" x="313" y="136">
+      <operator activated="true" class="nominal_to_numerical" compatibility="7.6.003" expanded="true" height="103" name="Nominal to Numerical" width="90" x="246" y="136">
         <parameter key="return_preprocessing_model" value="false"/>
         <parameter key="create_view" value="false"/>
         <parameter key="attribute_filter_type" value="value_type"/>
@@ -42,7 +33,7 @@
         <parameter key="unexpected_value_handling" value="all 0 and warning"/>
         <parameter key="use_underscore_in_name" value="false"/>
       </operator>
-      <operator activated="true" class="nominal_to_numerical" compatibility="7.6.003" expanded="true" height="103" name="Nominal to Numerical (4)" width="90" x="313" y="289">
+      <operator activated="true" class="nominal_to_numerical" compatibility="7.6.003" expanded="true" height="103" name="Nominal to Numerical (2)" width="90" x="380" y="136">
         <parameter key="return_preprocessing_model" value="false"/>
         <parameter key="create_view" value="false"/>
         <parameter key="attribute_filter_type" value="value_type"/>
@@ -63,7 +54,7 @@
         <parameter key="unexpected_value_handling" value="all 0 and warning"/>
         <parameter key="use_underscore_in_name" value="false"/>
       </operator>
-      <operator activated="false" class="normalize" compatibility="7.6.003" expanded="true" height="103" name="Normalize (2)" width="90" x="380" y="442">
+      <operator activated="true" class="normalize" compatibility="7.6.003" expanded="true" height="103" name="Normalize" width="90" x="514" y="136">
         <parameter key="return_preprocessing_model" value="false"/>
         <parameter key="create_view" value="false"/>
         <parameter key="attribute_filter_type" value="all"/>
@@ -83,26 +74,14 @@
         <parameter key="max" value="1.0"/>
         <parameter key="allow_negative_values" value="false"/>
       </operator>
-      <operator activated="true" class="productivity:execute_process" compatibility="7.6.003" expanded="true" height="103" name="Execute model (2)" width="90" x="581" y="238">
-        <parameter key="process_location" value="//ECAC Project/francisco/process/model"/>
-        <parameter key="use_input" value="true"/>
-        <parameter key="store_output" value="false"/>
-        <parameter key="propagate_metadata_recursively" value="true"/>
-        <parameter key="cache_process" value="true"/>
-        <list key="macros"/>
-        <parameter key="fail_for_unknown_macros" value="true"/>
-      </operator>
-      <connect from_op="Execute back_elim" from_port="result 1" to_op="Nominal to Numerical (3)" to_port="example set input"/>
-      <connect from_op="Nominal to Numerical (3)" from_port="example set output" to_op="Nominal to Numerical (4)" to_port="example set input"/>
-      <connect from_op="Nominal to Numerical (4)" from_port="example set output" to_op="Execute model (2)" to_port="input 1"/>
-      <connect from_op="Execute model (2)" from_port="result 1" to_port="result 1"/>
-      <connect from_op="Execute model (2)" from_port="result 2" to_port="result 2"/>
-      <connect from_op="Execute model (2)" from_port="result 3" to_port="result 3"/>
+      <connect from_port="input 1" to_op="Nominal to Numerical" to_port="example set input"/>
+      <connect from_op="Nominal to Numerical" from_port="example set output" to_op="Nominal to Numerical (2)" to_port="example set input"/>
+      <connect from_op="Nominal to Numerical (2)" from_port="example set output" to_op="Normalize" to_port="example set input"/>
+      <connect from_op="Normalize" from_port="example set output" to_port="result 1"/>
       <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="source_input 2" spacing="0"/>
       <portSpacing port="sink_result 1" spacing="0"/>
       <portSpacing port="sink_result 2" spacing="0"/>
-      <portSpacing port="sink_result 3" spacing="0"/>
-      <portSpacing port="sink_result 4" spacing="0"/>
     </process>
   </operator>
 </process>
