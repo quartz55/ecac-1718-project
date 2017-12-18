@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?><process version="7.6.003">
+  <context>
+    <input/>
+    <output/>
+    <macros/>
+  </context>
+  <operator activated="true" class="process" compatibility="7.6.003" expanded="true" name="Process">
+    <parameter key="logverbosity" value="init"/>
+    <parameter key="random_seed" value="2001"/>
+    <parameter key="send_mail" value="never"/>
+    <parameter key="notification_email" value=""/>
+    <parameter key="process_duration_for_mail" value="30"/>
+    <parameter key="encoding" value="SYSTEM"/>
+    <process expanded="true">
+      <operator activated="true" class="productivity:execute_process" compatibility="7.6.003" expanded="true" height="103" name="Execute train data" width="90" x="112" y="289">
+        <parameter key="process_location" value="//ECAC Project/francisco/process/train data"/>
+        <parameter key="use_input" value="true"/>
+        <parameter key="store_output" value="false"/>
+        <parameter key="propagate_metadata_recursively" value="true"/>
+        <parameter key="cache_process" value="true"/>
+        <list key="macros"/>
+        <parameter key="fail_for_unknown_macros" value="true"/>
+      </operator>
+      <operator activated="true" class="productivity:execute_process" compatibility="7.6.003" expanded="true" height="103" name="Execute select_data" width="90" x="246" y="289">
+        <parameter key="process_location" value="//ECAC Project/francisco/process/select_data"/>
+        <parameter key="use_input" value="true"/>
+        <parameter key="store_output" value="false"/>
+        <parameter key="propagate_metadata_recursively" value="true"/>
+        <parameter key="cache_process" value="true"/>
+        <list key="macros"/>
+        <parameter key="fail_for_unknown_macros" value="true"/>
+      </operator>
+      <operator activated="true" class="productivity:execute_process" compatibility="7.6.003" expanded="true" height="68" name="Execute prep svm" width="90" x="380" y="289">
+        <parameter key="process_location" value="//ECAC Project/francisco/process/prep svm"/>
+        <parameter key="use_input" value="true"/>
+        <parameter key="store_output" value="false"/>
+        <parameter key="propagate_metadata_recursively" value="true"/>
+        <parameter key="cache_process" value="true"/>
+        <list key="macros"/>
+        <parameter key="fail_for_unknown_macros" value="true"/>
+      </operator>
+      <operator activated="true" class="principal_component_analysis" compatibility="7.6.003" expanded="true" height="103" name="PCA" width="90" x="514" y="289">
+        <parameter key="dimensionality_reduction" value="keep variance"/>
+        <parameter key="variance_threshold" value="0.75"/>
+        <parameter key="number_of_components" value="1"/>
+      </operator>
+      <operator activated="true" class="productivity:execute_process" compatibility="7.6.003" expanded="true" height="103" name="Execute model" width="90" x="514" y="136">
+        <parameter key="process_location" value="//ECAC Project/francisco/process/model"/>
+        <parameter key="use_input" value="true"/>
+        <parameter key="store_output" value="false"/>
+        <parameter key="propagate_metadata_recursively" value="true"/>
+        <parameter key="cache_process" value="true"/>
+        <list key="macros"/>
+        <parameter key="fail_for_unknown_macros" value="true"/>
+      </operator>
+      <operator activated="false" class="generate_aggregation" compatibility="7.6.003" expanded="true" height="82" name="Generate Aggregation" width="90" x="514" y="391">
+        <parameter key="attribute_name" value="a"/>
+        <parameter key="attribute_filter_type" value="subset"/>
+        <parameter key="attribute" value=""/>
+        <parameter key="attributes" value="avg_balance|average salary "/>
+        <parameter key="use_except_expression" value="false"/>
+        <parameter key="value_type" value="attribute_value"/>
+        <parameter key="use_value_type_exception" value="false"/>
+        <parameter key="except_value_type" value="time"/>
+        <parameter key="block_type" value="attribute_block"/>
+        <parameter key="use_block_type_exception" value="false"/>
+        <parameter key="except_block_type" value="value_matrix_row_start"/>
+        <parameter key="invert_selection" value="false"/>
+        <parameter key="include_special_attributes" value="false"/>
+        <parameter key="aggregation_function" value="sum"/>
+        <parameter key="keep_all" value="true"/>
+        <parameter key="ignore_missings" value="true"/>
+        <parameter key="ignore_missing_attributes" value="false"/>
+      </operator>
+      <connect from_op="Execute train data" from_port="result 1" to_op="Execute select_data" to_port="input 1"/>
+      <connect from_op="Execute train data" from_port="result 2" to_op="Execute select_data" to_port="input 2"/>
+      <connect from_op="Execute train data" from_port="result 3" to_op="Execute select_data" to_port="input 3"/>
+      <connect from_op="Execute select_data" from_port="result 1" to_op="Execute prep svm" to_port="input 1"/>
+      <connect from_op="Execute prep svm" from_port="result 1" to_op="PCA" to_port="example set input"/>
+      <connect from_op="PCA" from_port="example set output" to_op="Execute model" to_port="input 1"/>
+      <connect from_op="Execute model" from_port="result 1" to_port="result 1"/>
+      <connect from_op="Execute model" from_port="result 2" to_port="result 2"/>
+      <connect from_op="Execute model" from_port="result 3" to_port="result 3"/>
+      <portSpacing port="source_input 1" spacing="0"/>
+      <portSpacing port="sink_result 1" spacing="0"/>
+      <portSpacing port="sink_result 2" spacing="0"/>
+      <portSpacing port="sink_result 3" spacing="0"/>
+      <portSpacing port="sink_result 4" spacing="0"/>
+    </process>
+  </operator>
+</process>

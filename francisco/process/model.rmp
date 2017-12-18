@@ -106,16 +106,33 @@
         <parameter key="local_random_seed" value="1992"/>
         <parameter key="enable_parallel_execution" value="true"/>
         <process expanded="true">
-          <operator activated="true" class="concurrency:parallel_decision_tree" compatibility="7.6.003" expanded="true" height="82" name="Decision Tree (4)" width="90" x="179" y="34">
+          <operator activated="true" class="concurrency:parallel_decision_tree" compatibility="7.6.003" expanded="true" height="82" name="Decision Tree (4)" width="90" x="179" y="136">
             <parameter key="criterion" value="information_gain"/>
             <parameter key="maximal_depth" value="20"/>
             <parameter key="apply_pruning" value="true"/>
-            <parameter key="confidence" value="0.30000003999999997"/>
+            <parameter key="confidence" value="1.0E-7"/>
             <parameter key="apply_prepruning" value="true"/>
             <parameter key="minimal_gain" value="0.0"/>
             <parameter key="minimal_leaf_size" value="8"/>
             <parameter key="minimal_size_for_split" value="4"/>
             <parameter key="number_of_prepruning_alternatives" value="3"/>
+          </operator>
+          <operator activated="false" class="concurrency:parallel_random_forest" compatibility="7.6.003" expanded="true" height="82" name="Random Forest" width="90" x="246" y="289">
+            <parameter key="number_of_trees" value="200"/>
+            <parameter key="criterion" value="accuracy"/>
+            <parameter key="maximal_depth" value="20"/>
+            <parameter key="apply_pruning" value="true"/>
+            <parameter key="confidence" value="0.5"/>
+            <parameter key="apply_prepruning" value="true"/>
+            <parameter key="minimal_gain" value="1.0"/>
+            <parameter key="minimal_leaf_size" value="2"/>
+            <parameter key="minimal_size_for_split" value="4"/>
+            <parameter key="number_of_prepruning_alternatives" value="3"/>
+            <parameter key="guess_subset_ratio" value="true"/>
+            <parameter key="subset_ratio" value="0.2"/>
+            <parameter key="voting_strategy" value="confidence vote"/>
+            <parameter key="use_local_random_seed" value="false"/>
+            <parameter key="local_random_seed" value="1992"/>
           </operator>
           <connect from_port="training set" to_op="Decision Tree (4)" to_port="training set"/>
           <connect from_op="Decision Tree (4)" from_port="model" to_port="model"/>
